@@ -8,5 +8,6 @@ python3 ./util/construct_dataset_mat_to_pickle_v1.py -t task2-NR
 python3 ./util/construct_dataset_mat_to_pickle_v1.py -t task3-TSR
 python3 ./util/construct_dataset_mat_to_pickle_v2.py
 
-python3 ./util/get_sentiment_labels.py
-python3 ./util/get_SST_ternary_dataset.py
+#for my masters i am not going to use zero shot sentiment classification
+#python3 ./util/get_sentiment_labels.py
+#python3 ./util/get_SST_ternary_dataset.py
