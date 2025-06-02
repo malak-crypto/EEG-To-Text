@@ -18,3 +18,4 @@ dependencies:
   - pip:
     - fuzzy-match==0.0.1
     - rouge==1.0.0
+    - psutil
