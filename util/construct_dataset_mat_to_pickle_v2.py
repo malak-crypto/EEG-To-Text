@@ -150,7 +150,7 @@ import gc
 from contextlib import contextmanager
 
 # Memory optimization configuration
-BATCH_SIZE = 9  # Process files in batches
+BATCH_SIZE = 2  # Process files in batches
 FLOAT_DTYPE = np.float32  # Use float32 instead of float64 to halve memory usage
 CHUNK_SIZE = 100  # Process sentences in chunks
 
