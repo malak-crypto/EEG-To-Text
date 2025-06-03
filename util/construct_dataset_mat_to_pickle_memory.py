@@ -243,6 +243,37 @@ def process_single_file_streaming(file_path, task, output_dir, task_name):
     print(f"Memory usage after: {get_memory_usage():.1f}%")
     return subject, sentences_processed
 
+def combine_subject_files(output_dir, task_name):
+    """Combine individual subject files into final dataset"""
+    print("\n=== Combining subject files ===")
+    
+    dataset_dict = {}
+    subject_files = [f for f in os.listdir(output_dir) if f.startswith(task_name) and f.endswith('.pickle')]
+    
+    for subject_file in subject_files:
+        if 'partial' in subject_file:  # Skip partial files
+            continue
+        if subject_file == f'{task_name}-dataset.pickle':  # Skip existing final file
+            continue
+            
+        subject_path = os.path.join(output_dir, subject_file)
+        try:
+            with open(subject_path, 'rb') as handle:
+                subject_data = pickle.load(handle)
+                dataset_dict.update(subject_data)
+                print(f"Added {subject_file}")
+        except Exception as e:
+            print(f"Error loading {subject_file}: {e}")
+    
+    # Save final combined dataset
+    final_path = os.path.join(output_dir, f'{task_name}-dataset.pickle')
+    with open(final_path, 'wb') as handle:
+        pickle.dump(dataset_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    print(f'Final combined dataset saved: {final_path}')
+    return dataset_dict
+
+
 def clean_partial_files(output_dir, task_name):
     """Remove partial files to allow reprocessing"""
     if not os.path.exists(output_dir):
@@ -297,32 +328,6 @@ def list_processed_subjects(output_dir, task_name):
             print(f"  {subject} ({size_mb:.1f} MB)")
     else:
         print("No processed subjects found")
-    """Combine individual subject files into final dataset"""
-    print("\n=== Combining subject files ===")
-    
-    dataset_dict = {}
-    subject_files = [f for f in os.listdir(output_dir) if f.startswith(task_name) and f.endswith('.pickle')]
-    
-    for subject_file in subject_files:
-        if 'partial' in subject_file:  # Skip partial files
-            continue
-            
-        subject_path = os.path.join(output_dir, subject_file)
-        try:
-            with open(subject_path, 'rb') as handle:
-                subject_data = pickle.load(handle)
-                dataset_dict.update(subject_data)
-                print(f"Added {subject_file}")
-        except Exception as e:
-            print(f"Error loading {subject_file}: {e}")
-    
-    # Save final combined dataset
-    final_path = os.path.join(output_dir, f'{task_name}-dataset.pickle')
-    with open(final_path, 'wb') as handle:
-        pickle.dump(dataset_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    print(f'Final combined dataset saved: {final_path}')
-    return dataset_dict
 
 def main():
     task = "NR"
