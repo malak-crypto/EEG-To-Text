@@ -8,9 +8,8 @@ This project builds upon the "Are EEG-To-Text models working?" implementation by
 * [Repository References](#repository-references)
 * [Dataset](#dataset)
 
-  * [Downloading the Data](#downloading-the-data)
-  * [Organizing the Data](#organizing-the-data)
-* [Installation](#installation)
+* [Downloading the Data](#downloading-the-data)
+* [Organizing the Data](#organizing-the-data)
 * [Data Preparation](#data-preparation)
 * [Usage](#usage)
 * [Batch Processing on Remote Clusters](#batch-processing-on-remote-clusters)
@@ -70,23 +69,6 @@ After downloading, move the MATLAB files into the following directory structure 
     └── Matlab_files/
 ```
 
-## Installation
-
-1. Clone this repository:
-
-   ```bash
-   ```
-
-git clone [https://github.com/YourUsername/YourRepoName.git](https://github.com/YourUsername/YourRepoName.git)
-cd YourRepoName
-
-````
-
-2. Install Python dependencies:
-
-   ```bash
-pip install -r requirements.txt
-````
 
 ## Data Preparation
 
