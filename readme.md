@@ -34,7 +34,7 @@ The ZuCo datasets (v1 and v2) are **not** included in this repository due to the
 
 ### Downloading the Data
 
-1. **ZuCo v1** (Tasks 1 SR and 2 NR)
+1. **ZuCo v1** (Tasks 1 SR , 2 NR and 3 TSR)
 
    * Navigate to: [https://osf.io/q3zws/files/osfstorage](https://osf.io/q3zws/files/osfstorage)
 2. **ZuCo v2** (Task 1 NR)
@@ -61,6 +61,8 @@ After downloading, move the MATLAB files into the following directory structure 
 ├── task1-SR/
 │   └── Matlab_files/
 ├── task2-NR/
+│   └── Matlab_files/
+├── task3-TSR/
 │   └── Matlab_files/
 └── task1-NR-2.0/
     └── Matlab_files/
