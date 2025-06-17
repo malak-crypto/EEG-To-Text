@@ -107,10 +107,10 @@ If your interactive node has time or resource limits, consider the following:
 #SBATCH --partition=gpu                    
 #SBATCH --gres=gpu:2  
 ```
-and then in your terminal run
+and then in your terminal run 
 
  ```bash
-bash ./scripts/prepare_dataset.sh
+sbash ./scripts/prepare_dataset.sh
 ```
 
 Refer to your documentation and needs this is just an example of resource allocation.
