@@ -100,15 +100,19 @@ If your interactive node has time or resource limits, consider the following:
  ```bash
 
 \#!/bin/bash
-\#SBATCH --job-name=prepare\_dataset
-\#SBATCH --time=04:00:00
-\#SBATCH --mem=32G
-\#SBATCH --cpus-per-task=8
-\#SBATCH --partition=gpu                    
-\#SBATCH --gres=gpu:2  
-bash ./scripts/prepare\_dataset.sh
-
+#SBATCH --job-name=prepare\_dataset
+#SBATCH --time=04:00:00
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=gpu                    
+#SBATCH --gres=gpu:2  
 ```
+and then in your terminal run
+
+ ```bash
+bash ./scripts/prepare_dataset.sh
+```
+
 Refer to your documentation and needs this is just an example of resource allocation.
 
 2. The `construct_dataset_mat_to_pickle_memory.py` script will continue processing from the last saved state after any termination, making it suitable for batch jobs.
