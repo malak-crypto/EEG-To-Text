@@ -1,6 +1,6 @@
 # EEG-To-Text Model
 
-This project builds upon the "Are EEG-To-Text models working?" implementation by NeuSpeech (NeuSpeech/EEG-To-Text) and leverages the base framework and execution pipeline from MikeWangWZHL (mikewang/eeg-to-text).
+This project builds upon the "Are EEG-To-Text models working?" implementation by NeuSpeech (NeuSpeech/EEG-To-Text) and leverages the base framework and execution pipeline from MikeWang (mikewang/eeg-to-text).
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ This project builds upon the "Are EEG-To-Text models working?" implementation by
 
 ## Overview
 
-This repository adapts and extends the NeuSpeech EEG-To-Text codebase to facilitate training and evaluation on the ZuCo (Zurich Cognitive Language Processing) datasets. It provides:
+This repository adapts and extends the NeuSpeech EEG-To-Text codebase. It provides:
 
 * Scripts to convert raw MATLAB EEG recordings into pickle files.
 * A standardized directory layout for dataset management.
@@ -23,7 +23,7 @@ This repository adapts and extends the NeuSpeech EEG-To-Text codebase to facilit
 
 ## Repository References
 
-* **Original Implementation**: NeuSpeech/EEG-To-Text<br>
+* **Implementation**: NeuSpeech/EEG-To-Text<br>
   [https://github.com/NeuSpeech/EEG-To-Text](https://github.com/NeuSpeech/EEG-To-Text)
 * **Framework & Execution**: MikeWangWZHL/EEG-To-Text<br>
   [https://github.com/MikeWangWZHL/EEG-To-Text/blob/main/README.md](https://github.com/MikeWangWZHL/EEG-To-Text/blob/main/README.md)
@@ -41,7 +41,7 @@ The ZuCo datasets (v1 and v2) are **not** included in this repository due to the
 
    * Navigate to: [https://osf.io/2urht/files/osfstorage](https://osf.io/2urht/files/osfstorage)
 
-You can download the files via a web browser or use the `osfclient` for programmatic access:
+You can download the files via a web browser or use the `osfclient` for programmatic access in terminal:
 
 ```bash
 pip install osfclient
