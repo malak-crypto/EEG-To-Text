@@ -11,10 +11,7 @@ This project builds upon the "Are EEG-To-Text models working?" implementation by
   * [Downloading the Data](#downloading-the-data)
   * [Organizing the Data](#organizing-the-data)
 * [Data Preparation](#data-preparation)
-* [Usage](#usage)
 * [Batch Processing on Remote Clusters](#batch-processing-on-remote-clusters)
-* [Contributing](#contributing)
-* [License](#license)
 
 ## Overview
 
@@ -79,6 +76,13 @@ bash ./scripts/prepare_dataset.sh
 ```
 
 This script calls:
+```bash
+python3 ./util/construct_dataset_mat_to_pickle_v1.py -t task1-SR
+python3 ./util/construct_dataset_mat_to_pickle_v1.py -t task2-NR
+python3 ./util/construct_dataset_mat_to_pickle_v1.py -t task3-TSR
+python3 ./util/construct_dataset_mat_to_pickle_v2.py
+```
+you will find that for v2 the line is commented and what is excuted is:
 
 ```bash
 python3 ./util/construct_dataset_mat_to_pickle_memory.py
@@ -86,25 +90,6 @@ python3 ./util/construct_dataset_mat_to_pickle_memory.py
 
 which handles large datasets robustly by resuming from the last processed file in case of interruptions.
 
-## Usage
-
-1. **Training**:
-
-   ```bash
-   ```
-
-python train.py --config configs/train\_config.yaml
-
-````
-
-2. **Evaluation/Inference**:
-
-   ```bash
-python inference.py --checkpoint path/to/checkpoint.pth \
-                   --data-dir ~/dataset/ZuCo/
-````
-
-Refer to the `configs/` directory for detailed options and hyperparameters.
 
 ## Batch Processing on Remote Clusters
 
@@ -112,8 +97,7 @@ If your interactive node has time or resource limits, consider the following:
 
 1. Modify the shell scripts (`.sh`) to include resource directives (e.g., for SLURM):
 
-   ```bash
-   ```
+ ```bash
 
 \#!/bin/bash
 \#SBATCH --job-name=prepare\_dataset
@@ -126,20 +110,4 @@ bash ./scripts/prepare\_dataset.sh
 
 2. The `construct_dataset_mat_to_pickle_memory.py` script will continue processing from the last saved state after any termination, making it suitable for batch jobs.
 
-## Contributing
-
-Contributions are welcome! Please fork the repository and open a pull request with your changes. Ensure that dataset paths and configurations are clearly documented.
-
-## License
-
-This project inherits the license of the original repositories. Please review:
-
-- [NeuSpeech/EEG-To-Text LICENSE](https://github.com/NeuSpeech/EEG-To-Text/blob/main/LICENSE)
-- [MikeWangWZHL/EEG-To-Text LICENSE](https://github.com/MikeWangWZHL/EEG-To-Text/blob/main/LICENSE)
-
----
-
-*Happy coding!*
-
-```
 
