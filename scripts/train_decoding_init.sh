@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=T5Translator_training
-#SBATCH --partition=gpu                    # GPU partition (adjust if different)
+#SBATCH --partition=standard-gpu                    # GPU partition (adjust if different)
 #SBATCH --nodes=1                          # Number of nodes
 #SBATCH --ntasks=1                         # Number of tasks
 #SBATCH --cpus-per-task=4                  # CPU cores per task (4 for data loading)
