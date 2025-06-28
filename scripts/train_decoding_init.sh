@@ -24,18 +24,18 @@ echo "Starting training at: $(date)"
 
 # Run the training script
 python3 train_decoding.py \
-    --model_name T5Translator \
-    --task_name task1_task2_taskNRv2 \
-    --one_step \
-    --pretrained \
-    --not_load_step1_checkpoint \
-    --num_epoch_step1 20 \
-    --num_epoch_step2 30 \
-    --train_input EEG \
-    --lr1 0.00002 \
-    --lr2 0.00002 \
+    -m T5Translator \
+    -t task1_task2_taskNRv2 \
+    -1step \
+    -pre \
+    -no-load1 \
+    -ne1 20 \
+    -ne2 30 \
+    -train_input EEG \
+    -lr1 0.00002 \
+    -lr2 0.00002 \
     -b 32 \
-    -s ./checkpoints/decoding\
+    -s ./checkpoints/decoding \
     -cuda cuda:0
 
 # Log job completion
