@@ -37,7 +37,7 @@ python3 train_decoding.py \
     --lr1 0.00002 \
     --lr2 0.00002 \
     -b 32 \
-    -s ./checkpoints/decoding
+    -s ./checkpoints/decoding\
     -cuda cuda:0
 
 # Log job completion
