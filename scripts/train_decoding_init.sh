@@ -4,8 +4,8 @@
 #SBATCH --partition=gpu                    # GPU partition (adjust if different)
 #SBATCH --nodes=1                          # Number of nodes
 #SBATCH --ntasks=1                         # Number of tasks
-#SBATCH --cpus-per-task=4                  # CPU cores per task (adjust as needed)
-#SBATCH --gres=gpu:v100:2                  # Request 2 V100 GPUs
+#SBATCH --cpus-per-task=4                  # CPU cores per task (4 for data loading)
+#SBATCH --gres=gpu:v100:1                  # Request 1 V100 GPU
 #SBATCH --mem=32G                          # Memory allocation (adjust as needed)
 #SBATCH --time=5:00:00                    # Maximum runtime (48 hours, adjust as needed)
 #SBATCH --output=logs/T5Translator_%j.out  # Standard output log
@@ -38,9 +38,8 @@ source activate EEGToText
 echo "Available GPUs:"
 nvidia-smi
 
-# Set CUDA devices (the SLURM scheduler will assign GPUs, but we can still specify)
-# Note: In SLURM, the GPU indices might be different, so we use 0,1 instead of 2,3
-export CUDA_VISIBLE_DEVICES=0,1
+# Set CUDA devices (SLURM will assign the GPU automatically)
+export CUDA_VISIBLE_DEVICES=0
 
 # Print environment information
 echo "Python version: $(python --version)"
