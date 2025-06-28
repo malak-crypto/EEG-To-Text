@@ -12,17 +12,14 @@
 #SBATCH --mail-type=BEGIN,END,FAIL           # Email notifications
 #SBATCH --mail-user=malak.hassanein@alumnos.upm.es
 
-# Navigate to project directory
-cd ~/home/w314/w314139/PROJECT/EEGToText
+apps/2021
+module load Anaconda3/2024.02-1
 
-# Create logs directory if it doesn't exist
 mkdir -p logs
 
-# Activate conda environment
 source activate EEGToText
 
-# Set CUDA device (optional: SLURM usually handles this)
-export CUDA_VISIBLE_DEVICES=0
+
 
 # Log training start time
 echo "Starting training at: $(date)"
@@ -41,6 +38,7 @@ python3 train_decoding.py \
     --lr2 0.00002 \
     -b 32 \
     -s ./checkpoints/decoding
+    -cuda cuda:0
 
 # Log job completion
 echo "==============================="
