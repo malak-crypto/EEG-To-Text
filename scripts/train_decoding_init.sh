@@ -14,8 +14,8 @@
 
 module load Anaconda3/2024.02-1
 
-
-source activate /home/w314/w314139/.conda/envs/EEGToText
+eval "$(conda shell.bash hook)"
+conda activate /home/w314/w314139/.conda/envs/EEGToText
 
 
 
