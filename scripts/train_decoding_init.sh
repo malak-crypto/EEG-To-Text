@@ -4,10 +4,10 @@
 #SBATCH --partition=gpu                    # GPU partition (adjust if different)
 #SBATCH --nodes=1                          # Number of nodes
 #SBATCH --ntasks=1                         # Number of tasks
-#SBATCH --cpus-per-task=8                  # CPU cores per task (adjust as needed)
+#SBATCH --cpus-per-task=4                  # CPU cores per task (adjust as needed)
 #SBATCH --gres=gpu:v100:2                  # Request 2 V100 GPUs
 #SBATCH --mem=32G                          # Memory allocation (adjust as needed)
-#SBATCH --time=48:00:00                    # Maximum runtime (48 hours, adjust as needed)
+#SBATCH --time=5:00:00                    # Maximum runtime (48 hours, adjust as needed)
 #SBATCH --output=logs/T5Translator_%j.out  # Standard output log
 #SBATCH --error=logs/T5Translator_%j.err   # Error log
 #SBATCH --mail-type=BEGIN,END,FAIL         # Email notifications
