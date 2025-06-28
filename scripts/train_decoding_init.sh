@@ -7,17 +7,15 @@
 #SBATCH --gres=gpu:1                         # Request 1 V100 GPU
 #SBATCH --mem=32G                            # Memory allocation
 #SBATCH --time=5:00:00                       # Max runtime (HH:MM:SS)
-#SBATCH --output=logs/T5Translator_%j.out    # Standard output log
-#SBATCH --error=logs/T5Translator_%j.err     # Standard error log
+#SBATCH --output=T5Translator_%j.out    # Standard output log
+#SBATCH --error=T5Translator_%j.err     # Standard error log
 #SBATCH --mail-type=BEGIN,END,FAIL           # Email notifications
 #SBATCH --mail-user=malak.hassanein@alumnos.upm.es
 
-apps/2021
 module load Anaconda3/2024.02-1
 
-mkdir -p logs
 
-source activate EEGToText
+source activate /home/w314/w314139/.conda/envs/EEGToText
 
 
 
