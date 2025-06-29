@@ -76,23 +76,23 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
             # target_ids_batch_label[target_ids_batch_label == tokenizer.pad_token_id] = -100
 
             # Original code 
-            # seq2seqLMoutput = model(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch) # (batch, time, n_class)
-            # logits_previous = seq2seqLMoutput.logits
-            # probs_previous = logits_previous[0].softmax(dim = 1)
-            # values_previous, predictions_previous = probs_previous.topk(1)
-            # predictions_previous = torch.squeeze(predictions_previous)
-            # predicted_string_previous = remove_text_after_token(tokenizer.decode(predictions_previous).split('</s></s>')[0].replace('<s>',''))
-            # f.write(f'predicted string with tf: {predicted_string_previous}\n')
-            # predictions_previous = predictions_previous.tolist()
-            # truncated_prediction_previous = []
-            # for t in predictions_previous:
-            #     if t != tokenizer.eos_token_id:
-            #         truncated_prediction_previous.append(t)
-            #     else:
-            #         break
-            # pred_tokens_previous = tokenizer.convert_ids_to_tokens(truncated_prediction_previous, skip_special_tokens = True)
-            # pred_tokens_list_previous.append(pred_tokens_previous)
-            # pred_string_list_previous.append(predicted_string_previous)
+            seq2seqLMoutput = model(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch) # (batch, time, n_class)
+            logits_previous = seq2seqLMoutput.logits
+            probs_previous = logits_previous[0].softmax(dim = 1)
+            values_previous, predictions_previous = probs_previous.topk(1)
+            predictions_previous = torch.squeeze(predictions_previous)
+            predicted_string_previous = remove_text_after_token(tokenizer.decode(predictions_previous).split('</s></s>')[0].replace('<s>',''))
+            f.write(f'predicted string with tf: {predicted_string_previous}\n')
+            predictions_previous = predictions_previous.tolist()
+            truncated_prediction_previous = []
+            for t in predictions_previous:
+                if t != tokenizer.eos_token_id:
+                    truncated_prediction_previous.append(t)
+                else:
+                    break
+            pred_tokens_previous = tokenizer.convert_ids_to_tokens(truncated_prediction_previous, skip_special_tokens = True)
+            pred_tokens_list_previous.append(pred_tokens_previous)
+            pred_string_list_previous.append(predicted_string_previous)
             
 
             # Modify code
