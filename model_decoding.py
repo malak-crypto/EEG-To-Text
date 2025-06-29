@@ -119,6 +119,7 @@ class T5Translator(nn.Module):
         input_embeddings: torch.Tensor,
         input_masks: torch.Tensor,
         input_masks_invert: torch.Tensor,
+        labels: torch.Tensor = None,
         **generate_kwargs
     ):
         """
