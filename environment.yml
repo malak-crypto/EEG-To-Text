@@ -21,3 +21,5 @@ dependencies:
     - psutil
     - evaluate 
     - sentencepiece
+    - secrebleu
+    - jiwer
