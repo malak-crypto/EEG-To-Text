@@ -96,7 +96,7 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
             
 
             # Modify code
-            predictions=model.generate(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch,
+            gen_out=model.generate(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch,
                                        max_length=56,
                                        num_beams=5,
                                        do_sample=True,
