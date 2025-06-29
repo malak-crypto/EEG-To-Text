@@ -46,7 +46,8 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
     pred_tokens_list_previous = []
     pred_string_list_previous = []
 
-
+    os.makedirs(os.path.dirname(output_all_results_path), exist_ok=True)
+    
     with open(output_all_results_path,'w') as f:
         for input_embeddings, seq_len, input_masks, input_mask_invert, target_ids, target_mask, sentiment_labels in tqdm(dataloaders['test']):
             # load in batch
@@ -218,7 +219,9 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
     f'wer_scores_with_tf = {wer_scores_previous}',
     f'cer_scores_with_tf = {cer_scores_previous}',
     ]
-    
+
+    os.makedirs(os.path.dirname(score_results), exist_ok=True)
+        
     with open(score_results, "a") as file_results:
         for line in file_content:
             if isinstance(line, list):
