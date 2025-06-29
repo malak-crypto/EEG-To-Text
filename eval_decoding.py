@@ -107,7 +107,8 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
                                        # early_stopping=True
                                        )
             
-            predicted_string=tokenizer.batch_decode(predictions, skip_special_tokens=True)[0]
+            token_ids = gen_out.sequences        # shape (batch_size, seq_len)
+            predicted_string = tokenizer.batch_decode(token_ids, skip_special_tokens=True)[0]
             # predicted_string=predicted_string.squeeze()
             
             predictions=tokenizer.encode(predicted_string)
