@@ -26,3 +26,11 @@ python3 eval_decoding.py \
     --test_input EEG \
     --train_input EEG \
     -cuda cuda:0
+
+# Log job completion
+echo "==============================="
+echo "Job completed at: $(date)"
+echo "Exit status: $?"
+
+# Optional: Send email notification upon job completion
+echo "Training job $SLURM_JOB_ID completed" | mail -s "Job $SLURM_JOB_ID finished" malak.hassanein@alumnos.upm.es
