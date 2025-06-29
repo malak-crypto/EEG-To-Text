@@ -28,11 +28,11 @@ cer_metric = load("cer")
 wer_metric = load("wer")
 
 def remove_text_after_token(text, token='</s>'):
-    # 특정 토큰 이후의 텍스트를 찾아 제거
+    
     token_index = text.find(token)
-    if token_index != -1:  # 토큰이 발견된 경우
-        return text[:token_index]  # 토큰 이전까지의 텍스트 반환
-    return text  # 토큰이 없으면 원본 텍스트 반환
+    if token_index != -1:  
+        return text[:token_index]  
+    return text  
 
 def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_results_path = './results/temp.txt' , score_results='./score_results/task.txt'):
     # modified from: https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
