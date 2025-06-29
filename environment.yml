@@ -19,3 +19,5 @@ dependencies:
     - fuzzy-match==0.0.1
     - rouge==1.0.0
     - psutil
+    - evaluate 
+    - sentencepiece
