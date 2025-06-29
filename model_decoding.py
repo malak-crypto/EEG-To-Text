@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
-from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig
+from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig, T5ForConditionalGeneration
 import math
 import numpy as np
 
