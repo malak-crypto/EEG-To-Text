@@ -351,7 +351,7 @@ if __name__ == '__main__':
 
     state_dict = torch.load(checkpoint_path)
     new_state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
-    model.load_state_dict(new_state_dict)
+    model.load_state_dict(new_state_dict,strict=False)
 
     '''
     if isinstance(model, nn.DataParallel):
