@@ -79,90 +79,108 @@ class BrainTranslator(nn.Module):
 from transformers import T5Tokenizer
 """ main architecture for open vocabulary EEG-To-Text decoding"""
 class T5Translator(nn.Module):
-    def __init__(self, pretrained_layers, in_feature = 840, decoder_embedding_size = 1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward = 2048):
-        super(T5Translator, self).__init__()
-        
-        self.pretrained = pretrained_layers
-
+    def __init__(
+        self,
+        pretrained_model: T5ForConditionalGeneration,
+        in_feature: int = 840,
+        decoder_embedding_size: int = 1024,
+        additional_encoder_nhead: int = 8,
+        additional_encoder_dim_feedforward: int = 2048,
+    ):
+        super().__init__()
+        self.pretrained = pretrained_model
+        # tokenizer for task prefix
         self.tokenizer = T5Tokenizer.from_pretrained("t5-large")
-        
-        # additional transformer encoder, following BART paper about 
-        self.additional_encoder_layer = nn.TransformerEncoderLayer(d_model=in_feature, nhead=additional_encoder_nhead,  dim_feedforward = additional_encoder_dim_feedforward, batch_first=True)
-        self.additional_encoder = nn.TransformerEncoder(self.additional_encoder_layer, num_layers=6)
-        
-        # print('[INFO]adding positional embedding')
-        # self.positional_embedding = PositionalEncoding(in_feature)
-
+        # extra EEG transformer encoder
+        enc_layer = nn.TransformerEncoderLayer(
+            d_model=in_feature,
+            nhead=additional_encoder_nhead,
+            dim_feedforward=additional_encoder_dim_feedforward,
+            batch_first=True,
+        )
+        self.additional_encoder = nn.TransformerEncoder(enc_layer, num_layers=6)
+        # projection to decoder's embedding size
         self.fc1 = nn.Linear(in_feature, decoder_embedding_size)
 
-    def addin_forward(self,input_embeddings_batch,  input_masks_invert):
-        """input_embeddings_batch: batch_size*Seq_len*840"""
-        """input_mask: 1 is not masked, 0 is masked"""
-        """input_masks_invert: 1 is masked, 0 is not masked"""
-
-        # input_embeddings_batch = self.positional_embedding(input_embeddings_batch)
-        # use src_key_padding_masks
-        encoded_embedding = self.additional_encoder(input_embeddings_batch, src_key_padding_mask=input_masks_invert)
-
-        # encoded_embedding = self.additional_encoder(input_embeddings_batch)
-        encoded_embedding = F.relu(self.fc1(encoded_embedding))
-        return encoded_embedding
+    def addin_forward(self, input_embeddings: torch.Tensor, input_masks_invert: torch.Tensor) -> torch.Tensor:
+        """
+        Run the additional EEG encoder and project to decoder embedding size.
+        input_embeddings: (batch, seq_len, in_feature)
+        input_masks_invert: (batch, seq_len) where 1=masked
+        """
+        # encode EEG embeddings
+        x = self.additional_encoder(input_embeddings, src_key_padding_mask=input_masks_invert)
+        # project and activate
+        return F.relu(self.fc1(x))
 
     @torch.no_grad()
     def generate(
-            self,
-            input_embeddings_batch, input_masks_batch, input_masks_invert, target_ids_batch_converted,
-            generation_config = None,
-            logits_processor = None,
-            stopping_criteria = None,
-            prefix_allowed_tokens_fn= None,
-            synced_gpus= None,
-            assistant_model = None,
-            streamer= None,
-            negative_prompt_ids= None,
-            negative_prompt_attention_mask = None,
-            **kwargs,
+        self,
+        input_embeddings: torch.Tensor,
+        input_masks: torch.Tensor,
+        input_masks_invert: torch.Tensor,
+        **generate_kwargs
     ):
-        encoded_embedding=self.addin_forward(input_embeddings_batch, input_masks_invert)
+        """
+        Generate sequences from EEG embeddings.
+        Assumes generate_kwargs may include:
+          - max_length, num_beams, do_sample, repetition_penalty, no_repeat_ngram_size, etc.
+        """
+        # 1) EEG encoder + projection
+        eeg_encoded = self.addin_forward(input_embeddings, input_masks_invert)
+        # 2) prepend task prefix to embeddings
+        prefix = self.tokenizer("transcribe in English: ", return_tensors="pt").input_ids.to(eeg_encoded.device)
+        prefix_emb = self.pretrained.shared(prefix)
+        # repeat for batch and concat
+        batch_size = eeg_encoded.size(0)
+        prefix_emb = prefix_emb.expand(batch_size, -1, -1)
+        full_emb = torch.cat([prefix_emb, eeg_encoded], dim=1)
+        # extend attention mask
+        prefix_mask = torch.ones(batch_size, prefix_emb.size(1), device=eeg_encoded.device)
+        full_mask = torch.cat([prefix_mask, input_masks], dim=1)
 
+        # 3) run T5 encoder on full embeddings
+        encoder = self.pretrained.get_encoder()
+        encoder_outputs = encoder(
+            inputs_embeds=full_emb,
+            attention_mask=full_mask,
+            return_dict=True,
+        )
 
-        input_ids = self.tokenizer("transcribe in English: ", return_tensors="pt").input_ids.to(encoded_embedding.device)
-        self.task_embedding = self.pretrained.shared(input_ids).to(encoded_embedding.device)
-        task_embedding = self.task_embedding.repeat(encoded_embedding.size(0), 1, 1).to(encoded_embedding.device)
-        encoded_embedding = torch.cat((task_embedding, encoded_embedding), dim=1)
-        input_masks_batch = torch.cat((torch.ones(encoded_embedding.size(0), task_embedding.size(1)).to(encoded_embedding.device), input_masks_batch), dim=1)
+        # 4) call generate with precomputed encoder_outputs
+        gen_out = self.pretrained.generate(
+            encoder_outputs=encoder_outputs,
+            attention_mask=full_mask,
+            return_dict_in_generate=True,
+            **generate_kwargs,
+        )
+        return gen_out
 
+    def forward(
+        self,
+        input_embeddings: torch.Tensor,
+        input_masks: torch.Tensor,
+        input_masks_invert: torch.Tensor,
+        labels: torch.Tensor,
+    ) -> torch.Tensor:
+        # 1) EEG encoder + projection
+        eeg_encoded = self.addin_forward(input_embeddings, input_masks_invert)
+        # 2) prepend task prefix
+        prefix = self.tokenizer("transcribe in English: ", return_tensors="pt").input_ids.to(eeg_encoded.device)
+        prefix_emb = self.pretrained.shared(prefix)
+        batch_size = eeg_encoded.size(0)
+        prefix_emb = prefix_emb.expand(batch_size, -1, -1)
+        full_emb = torch.cat([prefix_emb, eeg_encoded], dim=1)
+        prefix_mask = torch.ones(batch_size, prefix_emb.size(1), device=eeg_encoded.device)
+        full_mask = torch.cat([prefix_mask, input_masks], dim=1)
 
-        output=self.pretrained.generate(
-            inputs_embeds = encoded_embedding,
-            attention_mask = input_masks_batch[:,:encoded_embedding.shape[1]],
-            labels = target_ids_batch_converted,
-            return_dict = True,
-            generation_config=generation_config,
-            logits_processor=logits_processor,
-            stopping_criteria=stopping_criteria,
-            prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
-            synced_gpus=synced_gpus,
-            assistant_model=assistant_model,
-            streamer=streamer,
-            negative_prompt_ids=negative_prompt_ids,
-            negative_prompt_attention_mask=negative_prompt_attention_mask,
-            **kwargs,)
-
-        return output
-
-    def forward(self, input_embeddings_batch, input_masks_batch, input_masks_invert, target_ids_batch_converted):
-        encoded_embedding=self.addin_forward(input_embeddings_batch, input_masks_invert)
-        
-        # task definition
-        input_ids = self.tokenizer("transcribe in English: ", return_tensors="pt").input_ids.to(encoded_embedding.device)
-        self.task_embedding = self.pretrained.shared(input_ids).to(encoded_embedding.device)
-        task_embedding = self.task_embedding.repeat(encoded_embedding.size(0), 1, 1).to(encoded_embedding.device)
-        encoded_embedding = torch.cat((task_embedding, encoded_embedding), dim=1)
-        input_masks_batch = torch.cat((torch.ones(encoded_embedding.size(0), task_embedding.size(1)).to(encoded_embedding.device), input_masks_batch), dim=1)
-
-        out = self.pretrained(inputs_embeds = encoded_embedding, attention_mask = input_masks_batch,
-                              return_dict = True, labels = target_ids_batch_converted)
+        # 3) call T5 model for training
+        out = self.pretrained(
+            inputs_embeds=full_emb,
+            attention_mask=full_mask,
+            labels=labels,
+            return_dict=True,
+        )
         return out
 
 
