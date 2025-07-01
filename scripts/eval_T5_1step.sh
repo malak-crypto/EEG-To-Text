@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=T5Translator_training     # Job name
+#SBATCH --job-name=T5Translator_eval     # Job name
 #SBATCH --partition=standard-gpu             # GPU partition (adjust if needed)
 #SBATCH --nodes=1                            # Number of nodes
 #SBATCH --ntasks=1                           # Number of tasks
