@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=T5Translator_training     # Job name
+#SBATCH --job-name=BART_eval    # Job name
 #SBATCH --partition=standard-gpu             # GPU partition (adjust if needed)
 #SBATCH --nodes=1                            # Number of nodes
 #SBATCH --ntasks=1                           # Number of tasks
@@ -7,8 +7,8 @@
 #SBATCH --gres=gpu:1                         # Request 1 V100 GPU
 #SBATCH --mem=32G                            # Memory allocation
 #SBATCH --time=5:00:00                       # Max runtime (HH:MM:SS)
-#SBATCH --output=T5Translator_%j.out    # Standard output log
-#SBATCH --error=T5Translator_%j.err     # Standard error log
+#SBATCH --output=BART_%j.out    # Standard output log
+#SBATCH --error=BART_%j.err     # Standard error log
 #SBATCH --mail-type=BEGIN,END,FAIL           # Email notifications
 #SBATCH --mail-user=malak.hassanein@alumnos.upm.es
 
