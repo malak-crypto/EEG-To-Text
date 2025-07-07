@@ -26,7 +26,7 @@ python3 train_decoding.py \
     -t task1_task2_taskNRv2 \
     -2step \
     -pre \
-    -no-load1 \
+    -load1 \
     -ne1 20 \
     -ne2 30 \
     -train_input EEG \
