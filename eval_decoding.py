@@ -106,12 +106,13 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
                                        # do_sample=True, top_k=15,temperature=0.5,num_return_sequences=5,
                                        # early_stopping=True
                                        )
-            # if you are testing T5 keep this line, if testing BART comment this line
+            # if you are testing T5 else comment and use the other line of predicted_string = ....
             token_ids = gen_out.sequences        # shape (batch_size, seq_len)
-
-            
             predicted_string = tokenizer.batch_decode(token_ids, skip_special_tokens=True)[0]
-            # predicted_string=predicted_string.squeeze()
+
+            # if you are testing BART 
+            #predicted_string = tokenizer.batch_decode(gen_out, skip_special_tokens=True)[0]
+            
             
             predictions=tokenizer.encode(predicted_string)
             # print('predicted string:',predicted_string)
