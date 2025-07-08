@@ -12,7 +12,8 @@ dependencies:
   - h5py=2.10.0
   - tqdm=4.62.0
   - matplotlib=3.3.2
-  - transformers=4.31.0
+  #- transformer=4.6.1 if you want to use T5 
+  #- transformers=4.31.0 if you want to use BART
   - nltk=3.5
   - pip=21.0.1
   - pip:
