@@ -28,6 +28,9 @@ if __name__ == "__main__":
     dev_set   = ZuCo_dataset(all_dataset_dicts, 'dev', tokenizer, subject='ALL', eeg_type='GD', bands=bands, setting='unique_sent')
     test_set  = ZuCo_dataset(all_dataset_dicts, 'test', tokenizer, subject='ALL', eeg_type='GD', bands=bands, setting='unique_sent')
 
-    for name, split in zip(['Train', 'Dev', 'Test'], [train_set, dev_set, test_set]):
-        n_sent, n_words = count_sentences_and_words(split)
-        print(f"{name}: {n_sent} sentences, {n_words} words")
+    output_path = "sent_word_count.txt"
+    with open(output_path, "w") as f:  # "w" will create the file if it doesn't exist, or overwrite it if it does
+        for name, split in zip(['Train', 'Dev', 'Test'], [train_set, dev_set, test_set]):
+            n_sent, n_words = count_sentences_and_words(split)
+            f.write(f"{name}: {n_sent} sentences, {n_words} words\n")
+    print(f"Output written to {output_path}")
