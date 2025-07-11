@@ -1,6 +1,7 @@
 import pickle
 from data import ZuCo_dataset
 from transformers import BartTokenizer
+from transformers import T5Tokenizer
 
 def count_sentences_and_words(dataset):
     num_sent = len(dataset)
@@ -22,7 +23,7 @@ if __name__ == "__main__":
         with open(path, 'rb') as handle:
             all_dataset_dicts.append(pickle.load(handle))
 
-    tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
+    tokenizer = T5Tokenizer.from_pretrained('t5-large') #to avoid downloading BART for this specific task
 
     output_path = "sent_word_count_per_task.txt"
 
