@@ -6,9 +6,9 @@
 #SBATCH --cpus-per-task=4                    # CPU cores per task
 #SBATCH --gres=gpu:1                         # Request 1 V100 GPU
 #SBATCH --mem=32G                            # Memory allocation
-#SBATCH --time=5:00:00                       # Max runtime (HH:MM:SS)
-#SBATCH --output=stats_%j.out    # Standard output log
-#SBATCH --error=stats_%j.err     # Standard error log
+#SBATCH --time=2:00:00                       # Max runtime (HH:MM:SS)
+#SBATCH --output=stats_%j.out                # Standard output log
+#SBATCH --error=stats_%j.err                 # Standard error log
 #SBATCH --mail-type=BEGIN,END,FAIL           # Email notifications
 #SBATCH --mail-user=malak.hassanein@alumnos.upm.es
 
