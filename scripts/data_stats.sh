@@ -17,7 +17,5 @@ module load Anaconda3/2024.02-1
 eval "$(conda shell.bash hook)"
 conda activate /home/w314/w314139/.conda/envs/EEGToText
 
-
-
 # Run the training script
 python3 data_stats.py
