@@ -6,8 +6,8 @@ This project builds upon the "Are EEG-To-Text models working?" implementation by
 
 * [Overview](#overview)
 * [Repository References](#repository-references)
+* [Setting Up Your Conda Environment](#setting-up-your-conda-environment)
 * [Dataset](#dataset)
-
   * [Downloading the Data](#downloading-the-data)
   * [Organizing the Data](#organizing-the-data)
 * [Data Preparation](#data-preparation)
@@ -23,10 +23,22 @@ This repository adapts and extends the NeuSpeech EEG-To-Text codebase. It provid
 
 ## Repository References
 
-* **Implementation**: NeuSpeech/EEG-To-Text<br>
+* **Implementation**: NeuSpeech/EEG-To-Text  
   [https://github.com/NeuSpeech/EEG-To-Text](https://github.com/NeuSpeech/EEG-To-Text)
-* **Framework & Execution**: MikeWangWZHL/EEG-To-Text<br>
+* **Framework & Execution**: MikeWangWZHL/EEG-To-Text  
   [https://github.com/MikeWangWZHL/EEG-To-Text/blob/main/README.md](https://github.com/MikeWangWZHL/EEG-To-Text/blob/main/README.md)
+
+## Setting Up Your Conda Environment
+
+This project has been tested with **BART** and **T5** language models. Due to changes in library versions and compatibility issues, you need to select which model you plan to use and **uncomment the appropriate lines** in the `environment.yml` file before creating the environment.
+
+1. Open the `environment.yml` file.
+2. Uncomment the line(s) corresponding to the **transformers** version and model you want to use.
+3. Then run the following command to create your environment:
+
+```bash
+conda env create -f environment.yml
+
 
 ## Dataset
 
