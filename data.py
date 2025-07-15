@@ -192,14 +192,16 @@ class ZuCo_dataset(Dataset):
                 elif phase == 'dev':
                     print('[INFO]initializing a dev set...')
                     for key in subjects:
-                        for i in range(train_divider,dev_divider):
+                        #for i in range(train_divider,dev_divider): #next 10% after the 80%
+                        for i in range(dev_divider, total_num_sentence): #last 10%
                             input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
                             if input_sample is not None:
                                 self.inputs.append(input_sample)
                 elif phase == 'test':
                     print('[INFO]initializing a test set...')
                     for key in subjects:
-                        for i in range(dev_divider,total_num_sentence):
+                        #for i in range(dev_divider,total_num_sentence): #last 10%
+                        for i in range(train_divider, dev_divider): #next 10% after 80%
                             input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
                             if input_sample is not None:
                                 self.inputs.append(input_sample)
