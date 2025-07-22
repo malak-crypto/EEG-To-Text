@@ -5,6 +5,47 @@ from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig
 import math
 import numpy as np
 
+class BrainTranslator(nn.Module):
+    """BrainTranslator model for EEG-to-Text decoding (CSCL compatible).
+    Accepts a pre-trained encoder (e.g., from CSCL) and a seq2seq model.
+    Args:
+        pre_encoder: Pre-encoder module (can be CSCL-pretrained)
+        pretrained_seq2seq: Pretrained sequence-to-sequence model (e.g., BART)
+    """
+    def __init__(self, pre_encoder, pretrained_seq2seq):
+        super(BrainTranslator, self).__init__()
+        self.pre_encoder = pre_encoder
+        self.seq2seq = pretrained_seq2seq
+
+    def forward(self, src, mask_pre_encoder, mask_seq2seq, labels):
+        """
+        Args:
+            src (Tensor): Word-level EEG (batch_size, seq_len, input_dim)
+            mask_pre_encoder (Tensor): Input masks for pre-encoder (1 is masked, 0 is not)
+            mask_seq2seq (Tensor): Input masks for seq2seq (0 is masked, 1 is not)
+            labels (Tensor): Target labels
+        Returns:
+            out (Tensor): Output from seq2seq model
+        """
+        out = self.pre_encoder(src, mask_pre_encoder)
+        out = self.seq2seq(
+            inputs_embeds=out,
+            attention_mask=mask_seq2seq,
+            return_dict=True,
+            labels=labels
+        )
+        return out
+
+    def encode(self, src, mask_pre_encoder):
+        """
+        EEG encoder only (for CSCL training).
+        Args:
+            src (Tensor): EEG input
+            mask_pre_encoder (Tensor): EEG mask
+        Returns:
+            Encoded features
+        """
+        return self.pre_encoder(src, mask_pre_encoder)
 
 class BrainTranslatorPreEncoder(nn.Module):
     """Pre-encoder module for BrainTranslator (compatible with CSCL).
@@ -58,47 +99,6 @@ class BrainTranslatorPreEncoder(nn.Module):
         out = F.relu(self.fc(out))
         return out
 
-class BrainTranslator(nn.Module):
-    """BrainTranslator model for EEG-to-Text decoding (CSCL compatible).
-    Accepts a pre-trained encoder (e.g., from CSCL) and a seq2seq model.
-    Args:
-        pre_encoder: Pre-encoder module (can be CSCL-pretrained)
-        pretrained_seq2seq: Pretrained sequence-to-sequence model (e.g., BART)
-    """
-    def __init__(self, pre_encoder, pretrained_seq2seq):
-        super(BrainTranslator, self).__init__()
-        self.pre_encoder = pre_encoder
-        self.seq2seq = pretrained_seq2seq
-
-    def forward(self, src, mask_pre_encoder, mask_seq2seq, labels):
-        """
-        Args:
-            src (Tensor): Word-level EEG (batch_size, seq_len, input_dim)
-            mask_pre_encoder (Tensor): Input masks for pre-encoder (1 is masked, 0 is not)
-            mask_seq2seq (Tensor): Input masks for seq2seq (0 is masked, 1 is not)
-            labels (Tensor): Target labels
-        Returns:
-            out (Tensor): Output from seq2seq model
-        """
-        out = self.pre_encoder(src, mask_pre_encoder)
-        out = self.seq2seq(
-            inputs_embeds=out,
-            attention_mask=mask_seq2seq,
-            return_dict=True,
-            labels=labels
-        )
-        return out
-
-    def encode(self, src, mask_pre_encoder):
-        """
-        EEG encoder only (for CSCL training).
-        Args:
-            src (Tensor): EEG input
-            mask_pre_encoder (Tensor): EEG mask
-        Returns:
-            Encoded features
-        """
-        return self.pre_encoder(src, mask_pre_encoder)
 
 # Example usage for CSCL and downstream task
 # if __name__ == "__main__":
