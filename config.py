@@ -38,7 +38,14 @@ def get_config(case):
         parser.add_argument('-eeg', '--eeg_type', help='choose from {GD, FFD, TRT}', default = 'GD', required=False)
         parser.add_argument('-band', '--eeg_bands', nargs='+', help='specify freqency bands', default = ['_t1','_t2','_a1','_a2','_b1','_b2','_g1','_g2'] , required=False)
         parser.add_argument('-cuda', '--cuda', help='specify cuda device name, e.g. cuda:0, cuda:1, etc', default = 'cuda:0')
-        
+
+        # — CSCL pre-training options 
+        parser.add_argument('--use_cscl_pretrain', type=str2bool, default=False, help='If true, run CSCL-based pre-encoder training before finetuning full model')
+        parser.add_argument('--cscl_epochs', type=int, default=5, help='Number of epochs for CSCL pre-training')
+        parser.add_argument('--cscl_lr', type=float, default=1e-6,help='Learning rate for CSCL pre-training')
+        parser.add_argument('--cscl_T', type=float, default=1e-6, help='Temperature T for the contrastive loss')
+        parser.add_argument('--cscl_batch_size', type=int, default=1, help='Batch size to use during CSCL pre-training')
+
         parser.add_argument('-train_input', '--train_input', help='add noise' ,required=True)
         args = vars(parser.parse_args())
 
