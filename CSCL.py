@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from transformers import BartTokenizer
 
 from utils.HashTensor import HashTensor
-from dataset import ZuCo, build_CSCL_maps
+from data import ZuCo_dataset, build_CSCL_maps
 
 
 class CSCL:
