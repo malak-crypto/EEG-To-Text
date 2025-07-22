@@ -32,7 +32,7 @@ class BrainTranslatorPreEncoder(nn.Module):
             dim_feedforward=dim_pre_encoder,
             dropout=dropout,
             batch_first=True,
-            norm_first=True
+            #norm_first=True
         )
         self.pre_encoder_transformer = nn.TransformerEncoder(
             self.pre_encoder_layer,
