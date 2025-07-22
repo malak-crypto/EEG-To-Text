@@ -11,6 +11,8 @@ from tqdm import tqdm
 from fuzzy_match import match
 from fuzzy_match import algorithims
 from transformers import T5Tokenizer
+from collections import defaultdict
+from utils.HashTensor import HashTensor
 # macro
 #ZUCO_SENTIMENT_LABELS = json.load(open('./dataset/ZuCo/task1-SR/sentiment_labels/sentiment_labels.json'))
 #SST_SENTIMENT_LABELS = json.load(open('./dataset/stanfordsentiment/ternary_dataset.json'))
@@ -192,16 +194,16 @@ class ZuCo_dataset(Dataset):
                 elif phase == 'dev':
                     print('[INFO]initializing a dev set...')
                     for key in subjects:
-                        #for i in range(train_divider,dev_divider): #next 10% after the 80%
-                        for i in range(dev_divider, total_num_sentence): #last 10%
+                        for i in range(train_divider,dev_divider): #next 10% after the 80%
+                        #for i in range(dev_divider, total_num_sentence): #last 10%
                             input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
                             if input_sample is not None:
                                 self.inputs.append(input_sample)
                 elif phase == 'test':
                     print('[INFO]initializing a test set...')
                     for key in subjects:
-                        #for i in range(dev_divider,total_num_sentence): #last 10%
-                        for i in range(train_divider, dev_divider): #next 10% after 80%
+                        for i in range(dev_divider,total_num_sentence): #last 10%
+                        #for i in range(train_divider, dev_divider): #next 10% after 80%
                             input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
                             if input_sample is not None:
                                 self.inputs.append(input_sample)
@@ -253,93 +255,115 @@ class ZuCo_dataset(Dataset):
         )
         # keys: input_embeddings, input_attn_mask, input_attn_mask_invert, target_ids, target_mask, 
 
+def build_CSCL_maps(dataset):
+    """Construct sentence/subject to set of EEGs.
 
-"""for train classifier on stanford sentiment treebank text-sentiment pairs"""
-class SST_tenary_dataset(Dataset):
-    def __init__(self, ternary_labels_dict, tokenizer, max_len = 56, balance_class = True):
-        self.inputs = []
-        
-        pos_samples = []
-        neg_samples = []
-        neu_samples = []
+    Parameters
+    ----------
+    dataset : torch.utils.data.Dataset
+        The input dataset with EEG signals, masks, subjects, and sentences.
 
-        for key,value in ternary_labels_dict.items():
-            tokenized_inputs = tokenizer(key, padding='max_length', max_length=max_len, truncation=True, return_tensors='pt', return_attention_mask = True)
-            input_ids = tokenized_inputs['input_ids'][0]
-            attn_masks = tokenized_inputs['attention_mask'][0]
-            label = torch.tensor(value)
-            # count:
-            if value == 0:
-                neg_samples.append((input_ids,attn_masks,label))
-            elif value == 1:
-                neu_samples.append((input_ids,attn_masks,label))
-            elif value == 2:
-                pos_samples.append((input_ids,attn_masks,label))
-        print(f'Original distribution:\n\tVery positive: {len(pos_samples)}\n\tNeutral: {len(neu_samples)}\n\tVery negative: {len(neg_samples)}')    
-        if balance_class:
-            print(f'balance class to {min([len(pos_samples),len(neg_samples),len(neu_samples)])} each...')
-            for i in range(min([len(pos_samples),len(neg_samples),len(neu_samples)])):
-                self.inputs.append(pos_samples[i])
-                self.inputs.append(neg_samples[i])
-                self.inputs.append(neu_samples[i])
+    fs : defaultdict(set)
+        A dictionary mapping sentences to sets of EEG signals and their
+        corresponding attention masks. Each sentence in the dataset is
+        associated with a set of EEG signals and masks from all subjects.
+
+    fp : defaultdict(set)
+        A dictionary mapping subjects to sets of EEG signals and their
+        corresponding attention masks. Each subject in the dataset is
+        associated with a set of EEG signals and masks.
+
+    S : set
+        A set containing all unique sentences present in the dataset. Each
+        sentence in the dataset is included once in this set.
+
+    """
+    fs, fp, S = defaultdict(set), defaultdict(set), set()
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+    for sample in dataloader:
+        eeg = sample[0][0]
+        # input_attn_mask = sample[3][0]
+        subject = sample[-2][0]
+        sentence = sample[-1][0]
+
+        # sentence to set of EEG signals from all subjects for such sentence
+        fs[sentence].add(HashTensor(eeg))
+
+        # subject to set of EEG signals for that subject
+        fp[subject].add(HashTensor(eeg))
+
+        # set of all sentences
+        S.add(sentence)
+
+    return fs, fp, S
+
+
+def main():
+    """ML-ready ZuCo dataset sanity check."""
+    # load the pickle files for all tasks
+    whole_dataset_dicts = []
+
+    dataset_path_task1 = os.path.join(
+        '../', 'dataset', 'ZuCo',
+        'task1-SR', 'pickle', 'task1-SR-dataset.pickle'
+        )
+
+    dataset_path_task2 = os.path.join(
+        '../', 'dataset', 'ZuCo',
+        'task2-NR', 'pickle', 'task2-NR-dataset.pickle'
+        )
+
+    dataset_path_task2_v2 = os.path.join(
+        '../', 'dataset', 'ZuCo',
+        'task2-NR-2.0', 'pickle', 'task2-NR-2.0-dataset.pickle'
+        )
+
+    whole_dataset_dicts = []
+    for t in [dataset_path_task1, dataset_path_task2, dataset_path_task2_v2]:
+        with open(t, 'rb') as handle:
+            whole_dataset_dicts.append(pickle.load(handle))
+
+    # check the number of subjects and unique sentences in each task
+    for idx, dataset_dict in enumerate(whole_dataset_dicts):
+        if idx == 0:
+            num_sent = 400
+            num_subj = 12
+        elif idx == 1:
+            num_sent = 300
+            num_subj = 12
         else:
-            self.inputs = pos_samples + neg_samples + neu_samples
-        
-    def __len__(self):
-        return len(self.inputs)
+            num_sent = 349
+            num_subj = 18
 
-    def __getitem__(self, idx):
-        input_sample = self.inputs[idx]
-        return input_sample
-        # keys: input_embeddings, input_attn_mask, input_attn_mask_invert, target_ids, target_mask, 
-        
+        assert len(dataset_dict) == num_subj
+
+        for key in dataset_dict:
+            assert len(dataset_dict[key]) == num_sent
+
+    # data config
+    tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
+    subject_choice = 'ALL'
+    eeg_type_choice = 'GD'
+    bands_choice = 'ALL'
+    dataset_setting = 'unique_sent'
+
+    # check split size
+    for split in tqdm(['train', 'dev', 'test']):
+        dataset = ZuCo(
+            whole_dataset_dicts,
+            split,
+            tokenizer,
+            subject=subject_choice,
+            eeg_type=eeg_type_choice,
+            bands=bands_choice,
+            setting=dataset_setting
+            )
+        print(f' {split}set size:', len(dataset))
+
+        if split == 'train':
+            fs, fp, S = build_CSCL_maps(dataset)
 
 
-'''sanity test'''
 if __name__ == '__main__':
-
-    check_dataset = 'stanford_sentiment'
-
-    if check_dataset == 'ZuCo':
-        whole_dataset_dicts = []
-        
-        dataset_path_task1 = './dataset/ZuCo/task1-SR/pickle/task1-SR-dataset.pickle' 
-        with open(dataset_path_task1, 'rb') as handle:
-            whole_dataset_dicts.append(pickle.load(handle))
-
-        dataset_path_task2 = './dataset/ZuCo/task2-NR/pickle/task2-NR-dataset.pickle' 
-        with open(dataset_path_task2, 'rb') as handle:
-            whole_dataset_dicts.append(pickle.load(handle))
-
-
-        dataset_path_task2_v2 = './dataset/ZuCo/task2-NR-2.0/pickle/task2-NR-2.0-dataset.pickle' 
-        with open(dataset_path_task2_v2, 'rb') as handle:
-            whole_dataset_dicts.append(pickle.load(handle))
-
-        print()
-        for key in whole_dataset_dicts[0]:
-            print(f'task2_v2, sentence num in {key}:',len(whole_dataset_dicts[0][key]))
-        print()
-
-        tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
-        dataset_setting = 'unique_sent'
-        subject_choice = 'ALL'
-        print(f'![Debug]using {subject_choice}')
-        eeg_type_choice = 'GD'
-        print(f'[INFO]eeg type {eeg_type_choice}') 
-        bands_choice = ['_t1','_t2','_a1','_a2','_b1','_b2','_g1','_g2'] 
-        print(f'[INFO]using bands {bands_choice}')
-        train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject = subject_choice, eeg_type = eeg_type_choice, bands = bands_choice, setting = dataset_setting)
-        dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject = subject_choice, eeg_type = eeg_type_choice, bands = bands_choice, setting = dataset_setting)
-        test_set = ZuCo_dataset(whole_dataset_dicts, 'test', tokenizer, subject = subject_choice, eeg_type = eeg_type_choice, bands = bands_choice, setting = dataset_setting)
-
-        print('trainset size:',len(train_set))
-        print('devset size:',len(dev_set))
-        print('testset size:',len(test_set))
-
-    elif check_dataset == 'stanford_sentiment':
-        tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
-        SST_dataset = SST_tenary_dataset(SST_SENTIMENT_LABELS, tokenizer)
-        print('SST dataset size:',len(SST_dataset))
-        print(SST_dataset[0])
-        print(SST_dataset[1])
+    main()
