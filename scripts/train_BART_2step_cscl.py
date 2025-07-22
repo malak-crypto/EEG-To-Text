@@ -38,7 +38,7 @@ python3 train_decoding_cscl.py \
     -use_cscl_pretrain True \
     -cscl_epochs 5 \
     -cscl_lr 1e-6 \
-    -cscl_T 1e-6 \
+    -cscl_T 5e-6 \
     -cscl_batch_size 1 \
 
 
