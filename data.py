@@ -12,7 +12,7 @@ from fuzzy_match import match
 from fuzzy_match import algorithims
 from transformers import T5Tokenizer
 from collections import defaultdict
-from utils.HashTensor import HashTensor
+from util.HashTensor import HashTensor
 # macro
 #ZUCO_SENTIMENT_LABELS = json.load(open('./dataset/ZuCo/task1-SR/sentiment_labels/sentiment_labels.json'))
 #SST_SENTIMENT_LABELS = json.load(open('./dataset/stanfordsentiment/ternary_dataset.json'))
