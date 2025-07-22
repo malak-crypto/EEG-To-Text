@@ -164,7 +164,7 @@ if __name__ == '__main__':
     args = get_config('train_decoding')
 
     # --- NEW: CSCL config option ---
-    use_cscl_pretraining = args.get('use_cscl_pretraining', False)
+    use_cscl_pretraining = args.get('use_cscl_pretraining', True)
     cscl_epochs = args.get('cscl_epochs', 5)
     cscl_lr = args.get('cscl_lr', 1e-6)
     cscl_T = args.get('cscl_T', 5e-6)
@@ -196,9 +196,9 @@ if __name__ == '__main__':
     print(f'[INFO]using model: {model_name}')
 
     if skip_step_one:
-        save_name = f'{task_name}_finetune_{model_name}_skipstep1_b{batch_size}_{num_epochs_step1}_{num_epochs_step2}_{step1_lr}_{step2_lr}_{dataset_setting}_{train_input}'
+        save_name = f'{task_name}_finetune_{model_name}_{use_cscl_pretraining}_skipstep1_b{batch_size}_{num_epochs_step1}_{num_epochs_step2}_{step1_lr}_{step2_lr}_{dataset_setting}_{train_input}'
     else:
-        save_name = f'{task_name}_finetune_{model_name}_2steptraining_b{batch_size}_{num_epochs_step1}_{num_epochs_step2}_{step1_lr}_{step2_lr}_{dataset_setting}_{train_input}'
+        save_name = f'{task_name}_finetune_{model_name}_{use_cscl_pretraining}_2steptraining_b{batch_size}_{num_epochs_step1}_{num_epochs_step2}_{step1_lr}_{step2_lr}_{dataset_setting}_{train_input}'
 
     if use_random_init:
         save_name = 'randinit_' + save_name
