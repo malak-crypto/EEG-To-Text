@@ -24,4 +24,4 @@ dependencies:
     - sentencepiece
     - sacrebleu
     - jiwer
-    - collections
+    - wandb
