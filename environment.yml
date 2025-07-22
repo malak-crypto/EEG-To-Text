@@ -24,3 +24,4 @@ dependencies:
     - sentencepiece
     - sacrebleu
     - jiwer
+    - collections
