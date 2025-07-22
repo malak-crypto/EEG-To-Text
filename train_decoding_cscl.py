@@ -328,11 +328,20 @@ if __name__ == '__main__':
 
         # If using CSCL pretraining, pass the weights!
         if use_cscl_pretraining:
-            model = BrainTranslator(pretrained, in_feature=105*len(bands_choice), decoder_embedding_size=1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward=2048)
-            # Overwrite encoder weights from CSCL-preencoder (if architectures match)
-            model.encoder.load_state_dict(cscl_preencoder.state_dict(), strict=False)
+            # cscl_preencoder should be an instance of BrainTranslatorPreEncoder, already trained
+            # pretrained is your BART model (e.g., BartForConditionalGeneration)
+            model = BrainTranslator(pre_encoder=cscl_preencoder, pretrained_seq2seq=pretrained)
         else:
-            model = BrainTranslator(pretrained, in_feature=105*len(bands_choice), decoder_embedding_size=1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward=2048)
+            # If not using CSCL pretraining, initialize a new pre-encoder
+            pre_encoder = BrainTranslatorPreEncoder(
+                input_dim=105*len(bands_choice),  # adjust if needed!
+                num_layers=1,
+                nhead=1,
+                dim_pre_encoder=2048,
+                dim_s2s=1024,
+                dropout=0
+            )
+            model = BrainTranslator(pre_encoder=pre_encoder, pretrained_seq2seq=pretrained)
 
     elif model_name == 'BrainTranslatorNaive':
         pretrained = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
