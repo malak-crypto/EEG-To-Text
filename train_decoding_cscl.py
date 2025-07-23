@@ -351,9 +351,7 @@ if __name__ == '__main__':
     model.to(device)
     model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-    ######################################################
-    # STEP ONE TRAINING: freeze most transformer params
-    ######################################################
+
     if model_name in ['BrainTranslator', 'BrainTranslatorNaive', 'PegasusTranslator', 'T5Translator']:
         for name, param in model.named_parameters():
             if param.requires_grad and 'pretrained' in name:
@@ -371,6 +369,9 @@ if __name__ == '__main__':
                     param.requires_grad = False
 
     # ---- PIPELINE LOGIC: skip step one or not ----
+    ######################################################
+    # STEP ONE TRAINING: freeze most transformer params
+    ######################################################
     if skip_step_one:
         if load_step1_checkpoint:
             stepone_checkpoint = 'path_to_step_1_checkpoint.pt'
