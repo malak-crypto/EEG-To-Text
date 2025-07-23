@@ -40,7 +40,7 @@ def get_config(case):
         parser.add_argument('-cuda', '--cuda', help='specify cuda device name, e.g. cuda:0, cuda:1, etc', default = 'cuda:0')
 
         # — CSCL pre-training options 
-        parser.add_argument('--use_cscl_pretrain', type=str2bool, default=False, help='If true, run CSCL-based pre-encoder training before finetuning full model')
+        parser.add_argument('-cscl', '--use_cscl_pretrain', type=str2bool, default=False, help='If true, run CSCL-based pre-encoder training before finetuning full model')
         parser.add_argument('--cscl_epochs', type=int, default=5, help='Number of epochs for CSCL pre-training')
         parser.add_argument('--cscl_lr', type=float, default=1e-6,help='Learning rate for CSCL pre-training')
         parser.add_argument('--cscl_T', type=float, default=1e-6, help='Temperature T for the contrastive loss')
