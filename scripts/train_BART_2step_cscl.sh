@@ -34,7 +34,7 @@ python3 train_decoding_cscl.py \
     -lr2 0.00002 \
     -b 32 \
     -s ./checkpoints/decoding \
-    -cuda cuda:0
+    -cuda cuda:0 \
     -cscl True \
     -cscl_epochs 5 \
     -cscl_lr 1e-6 \
