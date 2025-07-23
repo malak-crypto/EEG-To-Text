@@ -165,7 +165,7 @@ if __name__ == '__main__':
     print(args)
 
     # --- NEW: CSCL config option ---
-    use_cscl_pretraining = args.get('use_cscl_pretrain', True)
+    use_cscl_pretraining = args.get('cscl', True)
     cscl_epochs = args.get('cscl_epochs', 5)
     cscl_lr = args.get('cscl_lr', 1e-6)
     cscl_T = args.get('cscl_T', 5e-6)
