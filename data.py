@@ -17,13 +17,6 @@ from util.HashTensor import HashTensor
 #ZUCO_SENTIMENT_LABELS = json.load(open('./dataset/ZuCo/task1-SR/sentiment_labels/sentiment_labels.json'))
 #SST_SENTIMENT_LABELS = json.load(open('./dataset/stanfordsentiment/ternary_dataset.json'))
 
-def normalize_1d(input_tensor):
-    # normalize a 1d tensor
-    mean = torch.mean(input_tensor)
-    std = torch.std(input_tensor)
-    input_tensor = (input_tensor - mean)/std
-    return input_tensor 
-
 def get_input_sample(sent_obj, tokenizer, eeg_type, bands, max_len=56):
     """Get a sample for a given sentence and subject EEG data.
 
