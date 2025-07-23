@@ -305,7 +305,7 @@ if __name__ == '__main__':
         cscl_objs = {'train': cscl_train_obj, 'dev': cscl_dev_obj}
 
         cscl_optimizer = optim.Adam(params=cscl_preencoder.parameters(), lr=cscl_lr)
-        cscl_preencoder = train_CSCL(cscl_preencoder, cscl_dataloaders, cscl_objs, cscl_T, cscl_optimizer, cscl_epochs, device, cscl_wandb)
+        cscl_preencoder = train_CSCL(cscl_preencoder, dataloaders, cscl_objs, cscl_T, cscl_optimizer, cscl_epochs, device, cscl_wandb)
         print('[INFO] Finished CSCL curriculum pretraining.')
 
         # Now use the pre-trained encoder weights in your main model!
