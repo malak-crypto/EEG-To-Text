@@ -160,88 +160,86 @@ def get_input_sample(sent_obj, tokenizer, eeg_type = 'GD', bands = ['_t1','_t2',
     return input_sample
 
 class ZuCo_dataset(Dataset):
-    def __init__(self, input_dataset_dicts, phase, tokenizer, subject = 'ALL', eeg_type = 'GD', bands = ['_t1','_t2','_a1','_a2','_b1','_b2','_g1','_g2'], setting = 'unique_sent', is_add_CLS_token = False, test_input='noise'):
+    """A custom dataset class for the ZuCo dataset.
+
+    Split for a given task(s), subject(s) and unique subject/sentence setting.
+
+    Constructor Arguments:
+        - input_dataset_dicts (list or dict): The pickle data for each task.
+        - phase (str): The dataset split. One of 'train', 'dev', or 'test'.
+        - tokenizer (object): The tokenizer used to convert text to tokens
+        - subject (str, optional): The subject(s) to use. Default is 'ALL'.
+        - eeg_type (str, optional): The type of eye-tracking features.
+        - bands (str or list, optional): The frequency bands. Default is 'ALL'.
+        - setting (str, optional): 'unique_sent' or 'unique_subj'. Default is 'unique_sent'.
+
+    Note:
+    ----
+        The dataset is split into three parts: 80% for training, 10% for
+        development (dev), and 10% for testing based on the 'phase' argument.
+
+        The 'unique_sent' setting creates the dataset by grouping sentences
+        based on their uniqueness, while the 'unique_subj' setting groups the
+        dataset based on unique subjects.
+
+        WARNING!!! The 'unique_subj' setting is specific to the SR v1 dataset.
+
+        For the 'unique_subj' setting, the following subjects are used:
+        - ['ZAB', 'ZDM', 'ZGW', 'ZJM', 'ZJN', 'ZJS', 'ZKB', 'ZKH', 'ZKW'] for training
+        - ['ZMG'] for dev
+        - ['ZPH'] for test
+
+    The getter method returns a tuple of:
+        - Word-level EEG embeddings of the sentence.
+        - Number of non-padding tokens in the sentence.
+        - Attention mask for input embeddings (for huggingface, 1 is not masked, 0 is masked)
+        - Inverted attention mask (for PyTorch, 1 is masked, 0 is not masked)
+        - Tokenized target sentence.
+        - Attention mask for target sentence.
+        - The subject.
+        - The target sentence.
+
+    """
+
+    def __init__(self,
+                 input_dataset_dicts,
+                 phase,
+                 tokenizer,
+                 subject='ALL',
+                 eeg_type='GD',
+                 bands='ALL',
+                 setting='unique_sent'):
+
+        if not isinstance(input_dataset_dicts, list):
+            input_dataset_dicts = [input_dataset_dicts]
+
         self.inputs = []
         self.tokenizer = tokenizer
         self.subject = subject
-        self.setting= setting
+        self.setting = setting
+        self.eeg_type = eeg_type
+        self.train = 0.8
+        self.dev = 0.1
+        self.bands = ['_t1', '_t2', '_a1', '_a2', '_b1', '_b2', '_g1', '_g2'] \
+            if bands == 'ALL' else bands
 
-        if not isinstance(input_dataset_dicts,list):
-            input_dataset_dicts = [input_dataset_dicts]
-        print(f'[INFO]loading {len(input_dataset_dicts)} task datasets')
+        # go through all task datasets
         for input_dataset_dict in input_dataset_dicts:
-            if subject == 'ALL':
-                subjects = list(input_dataset_dict.keys())
-                print('[INFO]using subjects: ', subjects)
-            else:
-                subjects = [subject]
-            
+
+            # get the subject(s) key/name for this task
+            subjects = list(input_dataset_dict.keys()) \
+                if subject == 'ALL' else [subject]
+
+            # number of sentences per subject in this task
             total_num_sentence = len(input_dataset_dict[subjects[0]])
-            
-            train_divider = int(0.8*total_num_sentence)
-            dev_divider = train_divider + int(0.1*total_num_sentence)
-            
-            print(f'train divider = {train_divider}')
-            print(f'dev divider = {dev_divider}')
 
+            # create dataset grouped by unique sentence or subject
             if setting == 'unique_sent':
-                # take first 80% as trainset, 10% as dev and 10% as test
-                if phase == 'train':
-                    print('[INFO]initializing a train set...')
-                    for key in subjects:
-                        for i in range(train_divider):
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
-                elif phase == 'dev':
-                    print('[INFO]initializing a dev set...')
-                    for key in subjects:
-                        for i in range(train_divider,dev_divider): #next 10% after the 80%
-                        #for i in range(dev_divider, total_num_sentence): #last 10%
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
-                elif phase == 'test':
-                    print('[INFO]initializing a test set...')
-                    for key in subjects:
-                        for i in range(dev_divider,total_num_sentence): #last 10%
-                        #for i in range(train_divider, dev_divider): #next 10% after 80%
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token, test_input=test_input)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
+                self.unique_sent(
+                    phase, subjects, input_dataset_dict, total_num_sentence
+                    )
             elif setting == 'unique_subj':
-                print('WARNING!!! only implemented for SR v1 dataset ')
-                # subject ['ZAB', 'ZDM', 'ZGW', 'ZJM', 'ZJN', 'ZJS', 'ZKB', 'ZKH', 'ZKW'] for train
-                # subject ['ZMG'] for dev
-                # subject ['ZPH'] for test
-                if phase == 'train':
-                    print(f'[INFO]initializing a train set using {setting} setting...')
-                    for i in range(total_num_sentence):
-                        for key in ['ZAB', 'ZDM', 'ZGW', 'ZJM', 'ZJN', 'ZJS', 'ZKB', 'ZKH','ZKW']:
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
-                if phase == 'dev':
-                    print(f'[INFO]initializing a dev set using {setting} setting...')
-                    for i in range(total_num_sentence):
-                        for key in ['ZMG']:
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
-                if phase == 'test':
-                    print(f'[INFO]initializing a test set using {setting} setting...')
-                    for i in range(total_num_sentence):
-                        for key in ['ZPH']:
-                            input_sample = get_input_sample(input_dataset_dict[key][i],self.tokenizer,eeg_type,bands = bands, add_CLS_token = is_add_CLS_token)
-                            if input_sample is not None:
-                                self.inputs.append(input_sample)
-            print('++ adding task to dataset, now we have:', len(self.inputs))
-
-        print('[INFO]input tensor size:', self.inputs[0]['input_embeddings'].size())
-        print()
-
-    def __len__(self):
-        return len(self.inputs)
+                self.unique_subj(phase, input_dataset_dict, total_num_sentence)
 
     def __getitem__(self, idx):
         input_sample = self.inputs[idx]
@@ -255,7 +253,60 @@ class ZuCo_dataset(Dataset):
             input_sample['subject'],
             input_sample['sentence']
         )
-        # keys: input_embeddings, input_attn_mask, input_attn_mask_invert, target_ids, target_mask, 
+
+    def __len__(self):
+        return len(self.inputs)
+
+    def unique_sent(
+            self, phase, subjects, input_dataset_dict, total_num_sentence
+            ):
+        # indices separating the sentences into train/dev/test splits
+        train_divider = int(self.train * total_num_sentence)
+        dev_divider = train_divider + int(self.dev * total_num_sentence)
+
+        if phase == 'train':
+            range_iter = range(train_divider)
+        elif phase == 'dev':
+            range_iter = range(train_divider, dev_divider)
+        elif phase == 'test':
+            range_iter = range(dev_divider, total_num_sentence)
+
+        for key in subjects:
+            for i in range_iter:
+                self.append_input_sample(input_dataset_dict, key, i)
+
+    def unique_subj(
+            self, phase, input_dataset_dict, total_num_sentence
+            ):
+        # sort the subjetcs into train/dev/test splits
+        if phase == 'train':
+            subj_iter = [
+                'ZAB', 'ZDM', 'ZGW', 'ZJM', 'ZJN', 'ZJS', 'ZKB', 'ZKH', 'ZKW'
+                ]
+        elif phase == 'dev':
+            subj_iter = ['ZMG']
+        elif phase == 'test':
+            subj_iter = ['ZPH']
+
+        for i in range(total_num_sentence):
+            for key in subj_iter:
+                self.append_input_sample(input_dataset_dict, key, i)
+
+    def append_input_sample(self, input_dataset_dict, key, i):
+        input_sample = get_input_sample(
+            input_dataset_dict[key][i],
+            self.tokenizer,
+            self.eeg_type,
+            self.bands
+            )
+        if input_sample is not None:
+            input_sample['input_embeddings'] = input_sample['input_embeddings'].to(torch.float)
+            input_sample['subject'] = key
+            input_dataset_dict[key][i]['word_tokens_all']
+            input_sample['sentence'] = " ".join(
+                input_dataset_dict[key][i]['word_tokens_all']
+                )
+            self.inputs.append(input_sample)
 
 def build_CSCL_maps(dataset):
     """Construct sentence/subject to set of EEGs.
