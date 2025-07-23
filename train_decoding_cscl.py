@@ -278,7 +278,7 @@ if __name__ == '__main__':
     print('[INFO]train_set size: ', len(train_set))
     print('[INFO]dev_set size: ', len(dev_set))
 
-    train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=4)
     val_dataloader = DataLoader(dev_set, batch_size=1, shuffle=False, num_workers=4)
     dataloaders = {'train': train_dataloader, 'dev': val_dataloader}
 
@@ -298,16 +298,8 @@ if __name__ == '__main__':
             wandb.init(project='CSCL', reinit=True, config=args)
             wandb.watch(cscl_preencoder, log='all')
 
-        # CSCL dataloader format must be compatible:
-        # build_CSCL_maps and CSCL expect ZuCo dataset interface!
-        cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-        cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-        cscl_train_loader = DataLoader(cscl_train_set, batch_size=1, shuffle=False)
-        cscl_dev_loader = DataLoader(cscl_dev_set, batch_size=1, shuffle=False)
-        cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
-
-        fs_train, fp_train, S_train = build_CSCL_maps(cscl_train_set)
-        fs_dev, fp_dev, S_dev = build_CSCL_maps(cscl_dev_set)
+        fs_train, fp_train, S_train = build_CSCL_maps(train_set)
+        fs_dev, fp_dev, S_dev = build_CSCL_maps(dev_set)
         cscl_train_obj = CSCL(fs_train, fp_train, S_train)
         cscl_dev_obj = CSCL(fs_dev, fp_dev, S_dev)
         cscl_objs = {'train': cscl_train_obj, 'dev': cscl_dev_obj}
