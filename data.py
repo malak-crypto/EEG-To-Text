@@ -244,14 +244,14 @@ class ZuCo_dataset(Dataset):
     def __getitem__(self, idx):
         input_sample = self.inputs[idx]
         return (
-            input_sample['input_embeddings'], 
+            input_sample['input_embeddings'],
             input_sample['seq_len'],
-            input_sample['input_attn_mask'], 
+            input_sample['input_attn_mask'],
             input_sample['input_attn_mask_invert'],
-            input_sample['target_ids'], 
-            input_sample['target_mask'], 
-            input_sample['sentiment_label'], 
-            #input_sample['sent_level_EEG']
+            input_sample['target_ids'],
+            input_sample['target_mask'],
+            input_sample['subject'],
+            input_sample['sentence']
         )
         # keys: input_embeddings, input_attn_mask, input_attn_mask_invert, target_ids, target_mask, 
 
