@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=4                    # CPU cores per task
 #SBATCH --gres=gpu:1                         # Request 1 V100 GPU
 #SBATCH --mem=32G                            # Memory allocation
-#SBATCH --time=5:00:00                       # Max runtime (HH:MM:SS)
+#SBATCH --time=10:00:00                       # Max runtime (HH:MM:SS)
 #SBATCH --output=BART_CSCL_%j.out    # Standard output log
 #SBATCH --error=BART_CSCL_%j.err     # Standard error log
 #SBATCH --mail-type=BEGIN,END,FAIL           # Email notifications
@@ -39,7 +39,7 @@ python3 train_decoding_cscl.py \
     -cscl_epochs 5 \
     -cscl_lr 1e-6 \
     -cscl_T 1 \
-    -cscl_batch_size 1 
+    -cscl_batch_size 16 
 
 
 # Log job completion
