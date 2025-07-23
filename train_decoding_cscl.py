@@ -162,6 +162,7 @@ def train_CSCL(model, dataloaders, cscl, T, optimizer, epochs, device, use_wandb
 # ---- MAIN PIPELINE ----
 if __name__ == '__main__':
     args = get_config('train_decoding')
+    print(args)
 
     # --- NEW: CSCL config option ---
     use_cscl_pretraining = args.get('use_cscl_pretrain', True)
