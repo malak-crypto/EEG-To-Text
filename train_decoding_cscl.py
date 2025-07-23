@@ -13,7 +13,7 @@ import time
 import copy
 from tqdm import tqdm
 from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig, BartForSequenceClassification, BertTokenizer, BertConfig, BertForSequenceClassification, RobertaTokenizer, PegasusTokenizer, PegasusForConditionalGeneration, T5Tokenizer, T5ForConditionalGeneration
-from data import ZuCo_dataset, build_CSCL_maps
+from data_cscl import ZuCo_dataset, build_CSCL_maps
 from model_decoding import BrainTranslator,BrainTranslatorPreEncoder, BrainTranslatorNaive, T5Translator
 from config import get_config
 from CSCL import CSCL
