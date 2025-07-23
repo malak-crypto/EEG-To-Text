@@ -35,7 +35,7 @@ python3 train_decoding_cscl.py \
     -b 32 \
     -s ./checkpoints/decoding \
     -cuda cuda:0
-    -use_cscl_pretrain True \
+    -cscl True \
     -cscl_epochs 5 \
     -cscl_lr 1e-6 \
     -cscl_T 5e-6 \
