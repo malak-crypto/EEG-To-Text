@@ -208,6 +208,7 @@ class ZuCo_dataset(Dataset):
                  subject='ALL',
                  eeg_type='GD',
                  bands='ALL',
+                 test_input='noise',
                  setting='unique_sent'):
 
         if not isinstance(input_dataset_dicts, list):
