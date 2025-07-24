@@ -168,7 +168,8 @@ if __name__ == '__main__':
     use_cscl_pretraining = args.get('cscl', True)
     cscl_epochs = args.get('cscl_epochs', 5)
     cscl_lr = args.get('cscl_lr', 1e-6)
-    cscl_T = args.get('cscl_T', 5e-6)
+    cscl_T = args.get('cscl_T', 1)
+    cscl_batch_size = args.get('cscl_batch_size',1)
     cscl_wandb = args.get('cscl_wandb', False)
 
     dataset_setting = 'unique_sent'
