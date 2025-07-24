@@ -306,8 +306,8 @@ if __name__ == '__main__':
     cscl_dev_loader = DataLoader(dev_set, batch_size=cscl_batch_size, shuffle=False)
     cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
-    fs_train, fp_train, S_train = build_CSCL_maps(cscl_train_set)
-    fs_dev, fp_dev, S_dev = build_CSCL_maps(cscl_dev_set)
+    fs_train, fp_train, S_train = build_CSCL_maps(train_set)
+    fs_dev, fp_dev, S_dev = build_CSCL_maps(dev_set)
     cscl_train_obj = CSCL(fs_train, fp_train, S_train)
     cscl_dev_obj = CSCL(fs_dev, fp_dev, S_dev)
     cscl_objs = {'train': cscl_train_obj, 'dev': cscl_dev_obj}
