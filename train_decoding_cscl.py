@@ -170,7 +170,7 @@ if __name__ == '__main__':
     cscl_lr = args.get('cscl_lr', 1e-6)
     cscl_T = args.get('cscl_T', 1)
     cscl_batch_size = args.get('cscl_batch_size',1)
-    #cscl_wandb = args.get('cscl_wandb', False)
+    cscl_wandb = args.get('cscl_wandb', False)
 
     dataset_setting = 'unique_sent'
     num_epochs_step1 = args['num_epoch_step1']
