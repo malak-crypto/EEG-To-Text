@@ -170,7 +170,7 @@ if __name__ == '__main__':
     cscl_lr = args.get('cscl_lr', 1e-6)
     cscl_T = args.get('cscl_T', 1)
     cscl_batch_size = args.get('cscl_batch_size',1)
-    cscl_wandb = args.get('cscl_wandb', False)
+    #cscl_wandb = args.get('cscl_wandb', False)
 
     dataset_setting = 'unique_sent'
     num_epochs_step1 = args['num_epoch_step1']
@@ -295,15 +295,15 @@ if __name__ == '__main__':
             dim_s2s=1024,
             dropout=0
         ).to(device)
-        if cscl_wandb:
-            wandb.init(project='CSCL', reinit=True, config=args)
-            wandb.watch(cscl_preencoder, log='all')
+        # if cscl_wandb:
+        #     wandb.init(project='CSCL', reinit=True, config=args)
+        #     wandb.watch(cscl_preencoder, log='all')
 
      # build_CSCL_maps and CSCL expect ZuCo dataset interface!
-    cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    cscl_train_loader = DataLoader(cscl_train_set, batch_size=cscl_batch_size, shuffle=False)
-    cscl_dev_loader = DataLoader(cscl_dev_set, batch_size=cscl_batch_size, shuffle=False)
+    #cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
+    #cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
+    cscl_train_loader = DataLoader(train_set, batch_size=cscl_batch_size, shuffle=False)
+    cscl_dev_loader = DataLoader(dev_set, batch_size=cscl_batch_size, shuffle=False)
     cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
     fs_train, fp_train, S_train = build_CSCL_maps(cscl_train_set)
