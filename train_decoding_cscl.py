@@ -298,14 +298,21 @@ if __name__ == '__main__':
             wandb.init(project='CSCL', reinit=True, config=args)
             wandb.watch(cscl_preencoder, log='all')
 
-        fs_train, fp_train, S_train = build_CSCL_maps(train_set)
-        fs_dev, fp_dev, S_dev = build_CSCL_maps(dev_set)
+     # build_CSCL_maps and CSCL expect ZuCo dataset interface!
+        cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
+        cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
+        cscl_train_loader = DataLoader(cscl_train_set, batch_size=cscl, shuffle=False)
+        cscl_dev_loader = DataLoader(cscl_dev_set, batch_size=1, shuffle=False)
+        cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
+
+        fs_train, fp_train, S_train = build_CSCL_maps(cscl_train_set)
+        fs_dev, fp_dev, S_dev = build_CSCL_maps(cscl_dev_set)
         cscl_train_obj = CSCL(fs_train, fp_train, S_train)
         cscl_dev_obj = CSCL(fs_dev, fp_dev, S_dev)
         cscl_objs = {'train': cscl_train_obj, 'dev': cscl_dev_obj}
 
         cscl_optimizer = optim.Adam(params=cscl_preencoder.parameters(), lr=cscl_lr)
-        cscl_preencoder = train_CSCL(cscl_preencoder, dataloaders, cscl_objs, cscl_T, cscl_optimizer, cscl_epochs, device, cscl_wandb)
+        cscl_preencoder = train_CSCL(cscl_preencoder, cscl_dataloaders, cscl_objs, cscl_T, cscl_optimizer, cscl_epochs, device, cscl_wandb)
         print('[INFO] Finished CSCL curriculum pretraining.')
 
         # Now use the pre-trained encoder weights in your main model!
