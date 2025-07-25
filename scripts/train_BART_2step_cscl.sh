@@ -39,7 +39,7 @@ python3 train_decoding_cscl.py \
     -cscl_epochs 5 \
     -cscl_lr 1e-6 \
     -cscl_T 1 \
-    -cscl_batch_size 16
+    -cscl_batch_size 1
 
 
 # Log job completion
