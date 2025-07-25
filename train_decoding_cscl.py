@@ -134,7 +134,7 @@ def train_CSCL(model, dataloaders, cscl, T, optimizer, epochs, device, use_wandb
                                        + torch.exp(F.cosine_similarity(h[j], h_neg, dim=0) / T).sum())
                             denom[j] = denom_j
                         loss = -torch.log(num / denom).mean()
-                        print(f'{epoch}.{batch_idx} {phase} Loss: {loss.item():.4f}')
+                        print(f'{epoch}.{batch} {phase} Loss: {loss.item():.4f}')
 
                         if phase == 'train':
                             optimizer.zero_grad(set_to_none=True)
