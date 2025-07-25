@@ -91,7 +91,7 @@ def train_CSCL(model, dataloaders, cscl, T, optimizer, epochs, device, use_wandb
     best_model_wts = copy.deepcopy(model.state_dict())
 
     for level in range(3):
-        best_loss = 100000000000
+        best_loss = float('inf')
 
         for epoch in range(epochs):
             print(f'CSCL Epoch {epoch}/{epochs - 1}, Level {level}')
@@ -107,28 +107,34 @@ def train_CSCL(model, dataloaders, cscl, T, optimizer, epochs, device, use_wandb
                 loader = dataloaders[phase]
 
                 for batch, (EEG, _, _, _, _, _, subject, sentence) in enumerate(loader):
-                    E, E_pos, E_neg, mask, mask_pos, mask_neg = cscl[phase].get_triplet(EEG, subject, sentence, level)
+                    triplet = cscl[phase].get_triplet(EEG, subject, sentence, level)
+                    if triplet is None:
+                        print("No Triplets this sample")
+                        continue 
+                    E, E_pos, E_neg, mask, mask_pos, mask_neg = triplet
+                    
                     with torch.set_grad_enabled(phase == 'train'):
                         mask_triplet = torch.vstack((mask, mask_pos, mask_neg)).to(device)
                         out = model(torch.vstack((E, E_pos, E_neg)).to(device), mask_triplet)
                         mask_triplet = abs(mask_triplet-1).unsqueeze(-1)
                         out = (out * mask_triplet).sum(1) / mask_triplet.sum(1)
+                        
 
-                        h = out[:E.size(0), :]
-                        h_pos = out[E.size(0):2*E.size(0), :]
-                        h_neg = out[2*E.size(0):, :]
+                        B = E.size(0)
+                        h = out[:B]
+                        h_pos = out[B:2*B]
+                        h_neg = out[2*B:]
+
 
                         num = torch.exp(F.cosine_similarity(h, h_pos, dim=1)/T)
                         denom = torch.empty_like(num, device=num.device)
-                        for j in range(E.size(0)):
-                            denomjj = 0
-                            for jj in range(E.size(0)):
-                                denomjj += torch.exp(F.cosine_similarity(h[j, :], h_pos[jj, :], dim=0)/T)
-                                denomjj += torch.exp(F.cosine_similarity(h[j, :], h_neg[jj, :], dim=0)/T)
-                            denom[j] = denomjj
-
+                        for j in range(B):
+                            # sum over all positives and negatives
+                            denom_j = (torch.exp(F.cosine_similarity(h[j], h_pos, dim=0) / T).sum()
+                                       + torch.exp(F.cosine_similarity(h[j], h_neg, dim=0) / T).sum())
+                            denom[j] = denom_j
                         loss = -torch.log(num / denom).mean()
-                        print(f'{epoch}.{batch} {phase} Loss: {loss:.4f}')
+                        print(f'{epoch}.{batch_idx} {phase} Loss: {loss.item():.4f}')
 
                         if phase == 'train':
                             optimizer.zero_grad(set_to_none=True)
@@ -302,8 +308,8 @@ if __name__ == '__main__':
      # build_CSCL_maps and CSCL expect ZuCo dataset interface!
     #cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
     #cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    cscl_train_loader = DataLoader(train_set, batch_size=cscl_batch_size, shuffle=False)
-    cscl_dev_loader = DataLoader(dev_set, batch_size=cscl_batch_size, shuffle=False)
+    cscl_train_loader = DataLoader(train_set, batch_size=cscl_batch_size, shuffle=True,drop_last=True)
+    cscl_dev_loader = DataLoader(dev_set, batch_size=cscl_batch_size, shuffle=True,drop_last=True)
     cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
     fs_train, fp_train, S_train = build_CSCL_maps(train_set)
