@@ -23,7 +23,7 @@ echo "Starting training at: $(date)"
 # Run the training script
 python3 train_decoding_cscl.py \
     -m BrainTranslator \
-    -t task1 \
+    -t task1_task2_taskNRv2 \
     -2step \
     -pre \
     -load1 \
