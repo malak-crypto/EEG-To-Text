@@ -333,7 +333,6 @@ if __name__ == '__main__':
     checkpoint_path = args['checkpoint_path']
     
     if model_name == 'BrainTranslator':
-        pretrained_bart = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
         pre_encoder = BrainTranslatorPreEncoder(
         input_dim=105 * len(bands_choice),
         num_layers=1,
