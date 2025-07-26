@@ -314,10 +314,10 @@ if __name__ == '__main__':
     dev_set_cscl   = ZuCo_dataset(whole_dataset_dicts_task1, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
     cscl_train_loader = DataLoader(train_set_cscl, batch_size=cscl_batch_size, shuffle=True, drop_last=True)
     cscl_dev_loader   = DataLoader(dev_set_cscl,   batch_size=cscl_batch_size, shuffle=True, drop_last=True)
-    cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
+    cscl_dataloaders  = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
-    fs_train, fp_train, S_train = build_CSCL_maps(train_set)
-    fs_dev, fp_dev, S_dev = build_CSCL_maps(dev_set)
+    fs_train, fp_train, S_train = build_CSCL_maps(train_set_cscl)
+    fs_dev, fp_dev, S_dev = build_CSCL_maps(dev_set_cscl)
     cscl_train_obj = CSCL(fs_train, fp_train, S_train)
     cscl_dev_obj = CSCL(fs_dev, fp_dev, S_dev)
     cscl_objs = {'train': cscl_train_obj, 'dev': cscl_dev_obj}
