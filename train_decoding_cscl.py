@@ -250,8 +250,9 @@ if __name__ == '__main__':
     if 'task1' in task_name:
         dataset_path_task1 = './dataset/ZuCo/task1-SR/pickle/task1-SR-dataset.pickle'
         with open(dataset_path_task1, 'rb') as handle:
-            whole_dataset_dicts.append(pickle.load(handle))
-            whole_dataset_dicts_task1.append(pickle.load(handle))
+            data1 = pickle.load(handle)
+            whole_dataset_dicts.append(data1)
+            whole_dataset_dicts_task1.append(data1)
     if 'task2' in task_name:
         dataset_path_task2 = './dataset/ZuCo/task2-NR/pickle/task2-NR-dataset.pickle'
         with open(dataset_path_task2, 'rb') as handle:
