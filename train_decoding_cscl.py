@@ -312,8 +312,8 @@ if __name__ == '__main__':
     # build_CSCL_maps and CSCL expect ZuCo dataset interface!
     train_set_cscl = ZuCo_dataset(whole_dataset_dicts_task1, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
     dev_set_cscl   = ZuCo_dataset(whole_dataset_dicts_task1, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    cscl_train_loader = DataLoader(train_set_cscl, batch_size=cscl_batch_size, shuffle=True, drop_last=True)
-    cscl_dev_loader   = DataLoader(dev_set_cscl,   batch_size=cscl_batch_size, shuffle=True, drop_last=True)
+    cscl_train_loader = DataLoader(train_set_cscl, batch_size=cscl_batch_size, shuffle=False, drop_last=False)
+    cscl_dev_loader   = DataLoader(dev_set_cscl,   batch_size=cscl_batch_size, shuffle=False, drop_last=False)
     cscl_dataloaders  = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
     fs_train, fp_train, S_train = build_CSCL_maps(train_set_cscl)
