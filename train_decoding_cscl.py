@@ -245,10 +245,13 @@ if __name__ == '__main__':
     print()
 
     whole_dataset_dicts = []
+    whole_dataset_dicts_task1 = []
+
     if 'task1' in task_name:
         dataset_path_task1 = './dataset/ZuCo/task1-SR/pickle/task1-SR-dataset.pickle'
         with open(dataset_path_task1, 'rb') as handle:
             whole_dataset_dicts.append(pickle.load(handle))
+            whole_dataset_dicts_task1.append(pickle.load(handle))
     if 'task2' in task_name:
         dataset_path_task2 = './dataset/ZuCo/task2-NR/pickle/task2-NR-dataset.pickle'
         with open(dataset_path_task2, 'rb') as handle:
@@ -289,7 +292,7 @@ if __name__ == '__main__':
     val_dataloader = DataLoader(dev_set, batch_size=1, shuffle=False, num_workers=4)
     dataloaders = {'train': train_dataloader, 'dev': val_dataloader}
 
-    # ---- OPTIONAL: CSCL CURRICULUM TRAINING ----
+    # ---- OPTIONAL: CSCL CURRICULUM TRAINING ---- #
     if use_cscl_pretraining:
         print('[INFO] Running CSCL curriculum-aware contrastive pretraining...')
         # CSCL model
@@ -305,11 +308,12 @@ if __name__ == '__main__':
         #     wandb.init(project='CSCL', reinit=True, config=args)
         #     wandb.watch(cscl_preencoder, log='all')
 
-     # build_CSCL_maps and CSCL expect ZuCo dataset interface!
-    #cscl_train_set = ZuCo_dataset(whole_dataset_dicts, 'train', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    #cscl_dev_set = ZuCo_dataset(whole_dataset_dicts, 'dev', tokenizer, subject=subject_choice, eeg_type=eeg_type_choice, bands=bands_choice, setting=dataset_setting, test_input=train_input)
-    cscl_train_loader = DataLoader(train_set, batch_size=cscl_batch_size, shuffle=True,drop_last=True)
-    cscl_dev_loader = DataLoader(dev_set, batch_size=cscl_batch_size, shuffle=True,drop_last=True)
+    # build_CSCL_maps and CSCL expect ZuCo dataset interface!
+    # wrap ONLY the task1 dataset for CSCL
+    train_set_cscl = ZuCo_dataset(whole_dataset_dicts_task1, 'train', tokenizer, subject=…, eeg_type=…, bands=…, setting=…, test_input=…)
+    dev_set_cscl   = ZuCo_dataset(whole_dataset_dicts_task1, 'dev',   tokenizer, subject=…, eeg_type=…, bands=…, setting=…, test_input=…)
+    cscl_train_loader = DataLoader(train_set_cscl, batch_size=cscl_batch_size, shuffle=True, drop_last=True)
+    cscl_dev_loader   = DataLoader(dev_set_cscl,   batch_size=cscl_batch_size, shuffle=True, drop_last=True)
     cscl_dataloaders = {'train': cscl_train_loader, 'dev': cscl_dev_loader}
 
     fs_train, fp_train, S_train = build_CSCL_maps(train_set)
