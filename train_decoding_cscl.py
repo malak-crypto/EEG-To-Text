@@ -37,7 +37,7 @@ def train_model(dataloaders, device, model, criterion, optimizer, scheduler, num
 
             running_loss = 0.0
 
-            for input_embeddings, seq_len, input_masks, input_mask_invert, target_ids, target_mask, sentiment_labels in tqdm(dataloaders[phase]):
+            for input_embeddings, seq_len, input_masks, input_mask_invert, target_ids, target_mask, subject, sentence in tqdm(dataloaders[phase]):
                 input_embeddings_batch = input_embeddings.to(device).float()
                 input_masks_batch = input_masks.to(device)
                 input_mask_invert_batch = input_mask_invert.to(device)
