@@ -100,43 +100,6 @@ class BrainTranslatorPreEncoder(nn.Module):
         return out
 
 
-# Example usage for CSCL and downstream task
-# if __name__ == "__main__":
-#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#     input_dim = 840
-#     num_layers = 6
-#     nhead = 8
-#     dim_pre_encoder = 2048
-#     dim_s2s = 1024
-
-#     # Instantiate pre-encoder
-#     pre_encoder = BrainTranslatorPreEncoder(
-#         input_dim=input_dim,
-#         num_layers=num_layers,
-#         nhead=nhead,
-#         dim_pre_encoder=dim_pre_encoder,
-#         dim_s2s=dim_s2s
-#     ).to(device)
-
-#     # Instantiate seq2seq model (BART)
-#     config = BartConfig.from_pretrained('facebook/bart-large')
-#     s2s = BartForConditionalGeneration.from_pretrained('facebook/bart-large').to(device)
-
-#     # Full BrainTranslator
-#     model = BrainTranslator(pre_encoder, s2s).to(device)
-
-#     # Dummy data for testing
-#     batch_size = 4
-#     seq_len = 56
-#     src = torch.rand(batch_size, seq_len, input_dim).to(device)
-#     mask_pre_encoder = torch.zeros(batch_size, seq_len, dtype=torch.bool).to(device)  # no mask
-#     mask_seq2seq = torch.ones(batch_size, seq_len, dtype=torch.long).to(device)       # all tokens attend
-#     labels = torch.ones(batch_size, seq_len, dtype=torch.long).to(device)
-
-#     # Forward pass
-#     out = model(src, mask_pre_encoder, mask_seq2seq, labels)
-#     print(out.logits.shape)
-
 # """ main architecture for open vocabulary EEG-To-Text decoding"""
 # class BrainTranslator(nn.Module):
 #     def __init__(self, pretrained_layers, in_feature = 840, decoder_embedding_size = 1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward = 2048):
