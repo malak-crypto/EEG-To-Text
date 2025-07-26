@@ -334,8 +334,7 @@ if __name__ == '__main__':
     
     if model_name == 'BrainTranslator':
         pretrained_bart = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
-        model = BrainTranslator(pretrained_bart, in_feature = 105*len(bands_choice), decoder_embedding_size = 1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward = 2048)
-    
+        model = model = BrainTranslator(pre_encoder=None, pretrained_seq2seq=None)
     elif model_name == 'BrainTranslatorNaive':
         pretrained_bart = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
         model = BrainTranslatorNaive(pretrained_bart, in_feature = 105*len(bands_choice), decoder_embedding_size = 1024, additional_encoder_nhead=8, additional_encoder_dim_feedforward = 2048)
