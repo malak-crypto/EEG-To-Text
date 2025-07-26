@@ -16,7 +16,7 @@ import torch.nn.functional as F
 import time
 from transformers import BertLMHeadModel, BartTokenizer, BartForConditionalGeneration, BartConfig, BartForSequenceClassification, BertTokenizer, BertConfig, BertForSequenceClassification, RobertaTokenizer, RobertaForSequenceClassification, PegasusForConditionalGeneration, PegasusTokenizer, T5Tokenizer, T5ForConditionalGeneration, BertGenerationDecoder
 from data import ZuCo_dataset
-from model_decoding import BrainTranslator, BrainTranslatorNaive, T5Translator
+from model_decoding import BrainTranslatorPreEncoder, BrainTranslator, BrainTranslatorNaive, T5Translator
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu
 from rouge import Rouge
 from config import get_config
