@@ -93,24 +93,19 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
             pred_tokens_previous = tokenizer.convert_ids_to_tokens(truncated_prediction_previous, skip_special_tokens = True)
             pred_tokens_list_previous.append(pred_tokens_previous)
             pred_string_list_previous.append(predicted_string_previous)
+
             
+            gen_out = model.generate(
+                input_embeddings_batch,    # 1) EEG embeddings → src
+                input_mask_invert_batch,   # 2) mask_pre_encoder (1=pad, 0=keep)
+                input_masks_batch,         # 3) mask_seq2seq  (1=keep, 0=pad)
+                max_length=56,
+                num_beams=5,
+                do_sample=True,
+                repetition_penalty=5.0,
+                no_repeat_ngram_size=2
+            )
 
-            # Modify code
-            gen_out=model.generate(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch,
-                                       max_length=56,
-                                       num_beams=5,
-                                       do_sample=True,
-                                       repetition_penalty= 5.0,
-                                       no_repeat_ngram_size = 2
-                                       # num_beams=5,encoder_no_repeat_ngram_size =1,
-                                       # do_sample=True, top_k=15,temperature=0.5,num_return_sequences=5,
-                                       # early_stopping=True
-                                       )
-            # if you are testing T5 else comment and use the other line of predicted_string = ....
-            #token_ids = gen_out.sequences        # shape (batch_size, seq_len)
-            #predicted_string = tokenizer.batch_decode(token_ids, skip_special_tokens=True)[0]
-
-            # if you are testing BART 
             predicted_string = tokenizer.batch_decode(gen_out, skip_special_tokens=True)[0]
             
             
