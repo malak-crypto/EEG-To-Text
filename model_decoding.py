@@ -46,6 +46,24 @@ class BrainTranslator(nn.Module):
             Encoded features
         """
         return self.pre_encoder(src, mask_pre_encoder)
+        
+       def generate(
+        self,
+        src: torch.Tensor,
+        mask_pre_encoder: torch.Tensor,
+        mask_seq2seq: torch.Tensor,
+        **generate_kwargs
+    ) -> torch.LongTensor:
+        
+        # 1) encode your EEG into BART‑style embeddings
+        embeds = self.pre_encoder(src, mask_pre_encoder)
+        
+        # 2) hand off to HF generate
+        return self.seq2seq.generate(
+            inputs_embeds  = embeds,
+            attention_mask = mask_seq2seq,
+            **generate_kwargs
+        )
 
 class BrainTranslatorPreEncoder(nn.Module):
     """Pre-encoder module for BrainTranslator (compatible with CSCL).
