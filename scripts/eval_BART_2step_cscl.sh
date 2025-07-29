@@ -20,9 +20,9 @@ conda activate /home/w314/w314139/.conda/envs/EEGToText
 # Log training start time
 echo "Starting training at: $(date)"
 
-python3 eval_decoding.py \
+python3 eval_decoding_cscl.py \
     -checkpoint checkpoints/decoding/best/task1_finetune_BrainTranslator_True_2steptraining_b32_20_30_2e-05_2e-05_unique_sent_EEG.pt \
-    -conf config/decoding/task1_finetune_BrainTranslator_True_2steptraining_b32_20_2e-05_2e-05_unique_sent_EEG.json \
+    -conf config/decoding/task1_finetune_BrainTranslator_True_2steptraining_b32_20_30_2e-05_2e-05_unique_sent_EEG.json \
     -test_input EEG \
     -train_input EEG \
     -cuda cuda:0
