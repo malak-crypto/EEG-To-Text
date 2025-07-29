@@ -96,9 +96,9 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
 
             
             gen_out = model.generate(
-                input_embeddings_batch,    # 1) EEG embeddings → src
-                input_mask_invert_batch,   # 2) mask_pre_encoder (1=pad, 0=keep)
-                input_masks_batch,         # 3) mask_seq2seq  (1=keep, 0=pad)
+                input_embeddings_batch, 
+                input_masks_batch,
+                input_mask_invert_batch,  
                 max_length=56,
                 num_beams=5,
                 do_sample=True,
