@@ -76,7 +76,7 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
             # target_ids_batch_label[target_ids_batch_label == tokenizer.pad_token_id] = -100
 
             # Original code 
-            seq2seqLMoutput = model(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch) # (batch, time, n_class)
+            seq2seqLMoutput = model(input_embeddings_batch, input_mask_invert_batch, input_mask_batch, target_ids_batch) # (batch, time, n_class)
             logits_previous = seq2seqLMoutput.logits
             probs_previous = logits_previous[0].softmax(dim = 1)
             values_previous, predictions_previous = probs_previous.topk(1)
