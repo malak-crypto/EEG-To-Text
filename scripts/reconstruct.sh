@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=gpt                     # Job name
 #SBATCH --partition=standard-gpu             # GPU partition (adjust if needed)
+#SBATCH --export=ALL
 #SBATCH --nodes=1                            # Number of nodes
 #SBATCH --ntasks=1                           # Number of tasks
 #SBATCH --cpus-per-task=4                    # CPU cores per task
