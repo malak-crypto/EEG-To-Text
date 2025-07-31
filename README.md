@@ -131,7 +131,7 @@ sbatch ./scripts/prepare_dataset.sh
 
 All training and evaluation scripts are located in the `scripts/` directory. To run a job:
 
-1. **Choose your script** from `./scripts/` (e.g., train_BART_1step.sh, train_T5_2step.sh, eval_BART_1step.sh , etc).
+1. **Choose your script** from `./scripts/` (e.g., `train_task1.sh`, `train_all_tasks.sh`, `eval.sh`, etc.).
 2. In your terminal, launch the job with:
 
    ```bash
@@ -151,14 +151,16 @@ All training and evaluation scripts are located in the `scripts/` directory. To 
 
 ### CSCL (Contrastive Semantic-aware Learning)
 
-We experimented with CSCL pre-encoder and adapter modules (`*_cscl.py` files), but found scaling issues:
+We experimented with CSCL pre-encoder and adapter modules (`*_cscl.py` files), adapted from the work by Gonzalo Rubio et al. in their EEG-to-Text Curriculum Semantic-aware Contrastive Learning repository: [https://github.com/gonzrubio/EEG-to-Text-Curriculum-Semantic-aware-Contrastive-Learning/tree/main](https://github.com/gonzrubio/EEG-to-Text-Curriculum-Semantic-aware-Contrastive-Learning)
+
+Our findings:
 
 1. Full-dataset CSCL pre-encoder training crashed mid-run.
-2. Task1-only training succeeded but yielded subpar metrics.
+2. Task1-only training succeeded but yielded lower metrics than original implementation.
 3. Sequential pre-encoder (task1) + full-model training resulted in zero scores.
 4. Adapter-based fine-tuning also produced zero scores.
 
-As a result, all `*_cscl.py` scripts are **commented out** by default. Feel free to:
+As a result, all `*_cscl.py` scripts are **commented out**. Feel free to:
 
 1. Uncomment any `*_cscl.py` file.
 2. Adjust hyperparameters in the corresponding script.
