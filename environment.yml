@@ -27,3 +27,4 @@ dependencies:
     - wandb
     - openai
     - langchain
+    - langchain_community
