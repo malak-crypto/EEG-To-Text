@@ -17,10 +17,23 @@ def adapter_finetune(args):
     # Build dataset list for all tasks
     tasks = cfg['task_name'].split('_')
     whole = []
-    for t in tasks:
-        path = f"./dataset/ZuCo/{t}/pickle/{t}-dataset.pickle"
-        if os.path.exists(path):
-            whole.append(pickle.load(open(path,'rb')))
+    if 'task1' in task_name:
+        dataset_path_task1 = './dataset/ZuCo/task1-SR/pickle/task1-SR-dataset.pickle'
+        with open(dataset_path_task1, 'rb') as handle:
+            whole.append(pickle.load(handle))
+    if 'task2' in task_name:
+        dataset_path_task2 = './dataset/ZuCo/task2-NR/pickle/task2-NR-dataset.pickle' 
+        with open(dataset_path_task2, 'rb') as handle:
+            whole.append(pickle.load(handle))
+    if 'task3' in task_name:
+        dataset_path_task3 = './dataset/ZuCo/task3-TSR/pickle/task3-TSR-dataset.pickle'
+        with open(dataset_path_task3, 'rb') as handle:
+            whole.append(pickle.load(handle))
+    if 'taskNRv2' in task_name:
+        dataset_path_taskNRv2 = './dataset/ZuCo/task2-NR-2.0/pickle/task2-NR-2.0-dataset.pickle' 
+        with open(dataset_path_taskNRv2, 'rb') as handle:
+            whole.append(pickle.load(handle))
+    print()
     # Tokenizer
     from transformers import BartTokenizer, PegasusTokenizer, T5Tokenizer
     if args.model == 'BrainTranslator' or args.model=='BrainTranslatorNaive':
