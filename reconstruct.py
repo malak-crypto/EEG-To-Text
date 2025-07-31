@@ -12,7 +12,7 @@ PATTERN = re.compile(r"^predicted string with tf:\s*(.*)", re.IGNORECASE)
 
 # Choose a free local model
 # Options: 'google/flan-t5-base', 'google/flan-t5-large'
-LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/flan-t5-base")
+LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/t5-small")
 
 # Initialize the text2text pipeline once
 device = 0 if torch.cuda.is_available() else -1
