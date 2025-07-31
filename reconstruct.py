@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# reconstruct.py
-# Free local reconstruction using Hugging Face T5 models with beam search
-
 import os
 import re
 import time
@@ -11,7 +7,7 @@ import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Configure directories and pattern
-DIRECTORIES = ["results_1exp"]
+DIRECTORIES = ["results_1exp", "results_2exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
 # Choose a free local model via env var, default to 't5-small'
@@ -48,23 +44,9 @@ def reconstruct_with_local(text: str) -> str:
     """
     Uses the local HF pipeline to reconstruct corrupted text with beam search.
     """
-    prompt = (
-        f"{SYSTEM_PROMPT}
-"
-        f"Corrupted sentence: \"{text}\"
-"
-        "Corrected sentence:"
-    )
-    try:
-        result = reconstructor(prompt)[0]
-        return result["generated_text"].strip()
-    except Exception as e:
-        return f"[ERROR] {e}"
-(text: str) -> str:
-    """
-    Uses the local HF pipeline to reconstruct corrupted text with beam search.
-    """
-    prompt = f"{SYSTEM_PROMPT}\nCorrupted: {text}\nReconstructed:"
+    prompt = f"""{SYSTEM_PROMPT}
+Corrupted sentence: \"{text}\"
+Corrected sentence:"""
     try:
         result = reconstructor(prompt)[0]
         return result["generated_text"].strip()
