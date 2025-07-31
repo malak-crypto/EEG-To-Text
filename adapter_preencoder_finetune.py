@@ -78,7 +78,7 @@ def adapter_finetune(args):
     # Training loop
     for epoch in range(args.epochs):
         total_loss = 0.0
-        for emb, seq_len, mask, mask_inv, tgt_ids, tgt_mask, _ in loader:
+        for emb, seq_len, mask, mask_inv, tgt_ids, tgt_mask, subject, sentence in loader:
             emb, mask, mask_inv, tgt_ids = emb.to(device), mask.to(device), mask_inv.to(device), tgt_ids.to(device)
             # TF forward
             out = model(emb, mask, mask_inv, tgt_ids)
