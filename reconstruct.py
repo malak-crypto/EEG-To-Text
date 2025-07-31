@@ -7,10 +7,10 @@ import openai
 # 1. Go to https://platform.openai.com/account/api-keys
 # 2. Click on "Create new secret key" and copy the generated key.
 # 3. Set it as an environment variable:
-#    export OPENAI_API_KEY="your_api_key_here"
+export OPENAI_API_KEY="your_api_key_here"
 
 # Load your API key from environment
-openai.api_key = os.getenv("your_api_key_here")
+openai.api_key = os.getenv("OPEN_API_KEY")
 if openai.api_key is None:
     raise ValueError("OPENAI_API_KEY environment variable not set")
 
