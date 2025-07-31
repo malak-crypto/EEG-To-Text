@@ -17,7 +17,7 @@ if openai.api_key is None:
 # Directories containing your result files
 directories = ["results_1exp", "results_2exp"]
 # Pattern to extract the tf-predicted sentence
-pattern = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
+pattern = re.compile(r"^predicted string with tf:\s*(.*)", re.IGNORECASE)
 
 # Function to call the OpenAI API and reconstruct the sentence
  def reconstruct_sentence(sentence: str) -> str:
