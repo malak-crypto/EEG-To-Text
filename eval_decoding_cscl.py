@@ -77,11 +77,22 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
 
             # Original code 
             seq2seqLMoutput = model(input_embeddings_batch, input_masks_batch, input_mask_invert_batch, target_ids_batch) # (batch, time, n_class)
-            logits_previous = seq2seqLMoutput.logits
-            probs_previous = logits_previous[0].softmax(dim = 1)
-            values_previous, predictions_previous = probs_previous.topk(1)
-            predictions_previous = torch.squeeze(predictions_previous)
-            predicted_string_previous = remove_text_after_token(tokenizer.decode(predictions_previous).split('</s></s>')[0].replace('<s>',''))
+            # logits_previous = seq2seqLMoutput.logits
+            # probs_previous = logits_previous[0].softmax(dim = 1)
+            # values_previous, predictions_previous = probs_previous.topk(1)
+            # predictions_previous = torch.squeeze(predictions_previous)
+            # predicted_string_previous = remove_text_after_token(tokenizer.decode(predictions_previous).split('</s></s>')[0].replace('<s>',''))
+
+            # after your forward pass
+            logits = seq2seqLMoutput.logits           # [B, T, V]
+            
+            # get the most‐likely token at each time step
+            pred_ids = logits.argmax(dim=-1)[0].tolist()  # [T]
+            
+            # decode in one go
+            pred_string_previous = tokenizer.decode(pred_ids, skip_special_tokens=True)
+            pred_tokens_previous = tokenizer.convert_ids_to_tokens(pred_ids, skip_special_tokens=True)
+
             f.write(f'predicted string with tf: {predicted_string_previous}\n')
             predictions_previous = predictions_previous.tolist()
             truncated_prediction_previous = []
