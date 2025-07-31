@@ -6,8 +6,8 @@ import openai
 # Instructions to obtain your OpenAI API key:
 # 1. Go to https://platform.openai.com/account/api-keys
 # 2. Click on "Create new secret key" and copy the generated key.
-# 3. Set it as an environment variable:
-export OPENAI_API_KEY="your_api_key_here"
+# 3. Set it as an environment variable in your shell (do NOT include this line in the Python code):
+#    export OPENAI_API_KEY="your_api_key_here"
 
 # Load your API key from environment
 openai.api_key = os.getenv("OPEN_API_KEY")
