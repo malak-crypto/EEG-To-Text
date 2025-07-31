@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# reconstruct.py
-
 import os
 import re
 import time
