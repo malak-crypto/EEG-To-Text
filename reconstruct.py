@@ -10,7 +10,7 @@ import openai
 #    export OPENAI_API_KEY="your_api_key_here"
 
 # Load your API key from environment
-openai.api_key = os.getenv("OPEN_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 if openai.api_key is None:
     raise ValueError("OPENAI_API_KEY environment variable not set")
 
