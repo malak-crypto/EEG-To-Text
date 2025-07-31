@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# reconstruct.py
+# Free local reconstruction using Hugging Face T5 models with beam search
+
 import os
 import re
 import time
@@ -7,13 +11,11 @@ import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Configure directories and pattern
-DIRECTORIES = ["results_1exp", "results_2exp"]
+DIRECTORIES = ["results_1exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Choose a free local model via env var, default to 't5-small' to avoid safetensors issues
-# Other options: 'google/flan-t5-base', 'google/flan-t5-large'
+# Choose a free local model via env var, default to 't5-small'
 LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "t5-small")
-
 # Determine device: GPU if available
 DEVICE = 0 if torch.cuda.is_available() else -1
 
@@ -22,7 +24,7 @@ print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE==0 else 'CPU'}..
 tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
 model = AutoModelForSeq2SeqLM.from_pretrained(LOCAL_MODEL, use_safetensors=False)
 
-# Setup the text2text pipeline with manual model and tokenizer
+# Setup the text2text pipeline with beam search parameters
 reconstructor = pipeline(
     "text2text-generation",
     model=model,
@@ -30,19 +32,39 @@ reconstructor = pipeline(
     device=DEVICE,
     max_length=128,
     do_sample=False,
+    num_beams=5,
+    early_stopping=True,
 )
 
-# System prompt for local model (included in input prompt)
+# Enhanced prompt
 SYSTEM_PROMPT = (
-    "Restore this corrupted sentence to its original form with minimal edits. "
-    "Adjust spaces and punctuation as necessary without adding new information."
+    "You are a linguistic expert specialized in restoring corrupted or garbled sentences. "
+    "Given a distorted English sentence, correct all grammatical errors, fix word order, punctuation, and spacing, "
+    "while preserving the original meaning and without adding new information. "
+    "Respond only with the corrected sentence."
 )
 
 def reconstruct_with_local(text: str) -> str:
     """
-    Uses the local HF pipeline to reconstruct corrupted text.
+    Uses the local HF pipeline to reconstruct corrupted text with beam search.
     """
-    prompt = f"{SYSTEM_PROMPT} Text: \"{text}\""
+    prompt = (
+        f"{SYSTEM_PROMPT}
+"
+        f"Corrupted sentence: \"{text}\"
+"
+        "Corrected sentence:"
+    )
+    try:
+        result = reconstructor(prompt)[0]
+        return result["generated_text"].strip()
+    except Exception as e:
+        return f"[ERROR] {e}"
+(text: str) -> str:
+    """
+    Uses the local HF pipeline to reconstruct corrupted text with beam search.
+    """
+    prompt = f"{SYSTEM_PROMPT}\nCorrupted: {text}\nReconstructed:"
     try:
         result = reconstructor(prompt)[0]
         return result["generated_text"].strip()
@@ -62,7 +84,7 @@ def process_file(infile: str, outfile: str):
                 corrupted = m.group(1).strip()
                 reconstructed = reconstruct_with_local(corrupted)
                 fout.write(f"Original: {corrupted}\nReconstructed: {reconstructed}\n\n")
-                time.sleep(0.5)  # small pause
+                time.sleep(0.5)
             else:
                 fout.write(line)
 
