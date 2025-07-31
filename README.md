@@ -131,7 +131,7 @@ sbatch ./scripts/prepare_dataset.sh
 
 All training and evaluation scripts are located in the `scripts/` directory. To run a job:
 
-1. **Choose your script** from `./scripts/` (e.g., `train_BART_1step.sh, train_T5_2step.sh, eval_BART_1step.sh , etc).
+1. **Choose your script** from `./scripts/` (e.g., train_BART_1step.sh, train_T5_2step.sh, eval_BART_1step.sh , etc).
 2. In your terminal, launch the job with:
 
    ```bash
