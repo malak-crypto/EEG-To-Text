@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# reconstruct.py
-# Free local reconstruction using Hugging Face T5 models
-
 import os
 import re
 import time
