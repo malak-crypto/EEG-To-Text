@@ -7,7 +7,7 @@ import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Configure directories and pattern
-DIRECTORIES = ["results_1exp", "results_2exp"]
+DIRECTORIES = ["results_1exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
 # Choose a free local model via env var, default to 't5-small'
