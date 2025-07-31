@@ -26,6 +26,6 @@ python3 adapter_preencoder_finetune.py \
   -epochs 2 \
   -lr 1e-4 \
   -cuda cuda:0 \
-  -output checkpoints/decoding/adapter_task1_3tasks_preencoder.pt
+  -output checkpoints/decoding/best/task1_task2_taskNRv2_finetune_BrainTranslator_True_2steptraining_b32_20_30_2e-05_2e-05_unique_sent_EEG_adapt.pt
 
 echo "Adapter fine-tuning end: $(date), status: $?"
