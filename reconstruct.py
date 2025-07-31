@@ -1,39 +1,50 @@
+#!/usr/bin/env python3
+# reconstruct.py
+# Free local reconstruction using Hugging Face T5 models
+
 import os
 import re
 import time
 import glob
 import sys
 import torch
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Configure directories and pattern
 DIRECTORIES = ["results_1exp", "results_2exp"]
-PATTERN = re.compile(r"^predicted string with tf:\s*(.*)", re.IGNORECASE)
+PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Choose a free local model
-# Options: 'google/flan-t5-base', 'google/flan-t5-large'
-LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/t5-small")
+# Choose a free local model via env var, default to 't5-small' to avoid safetensors issues
+# Other options: 'google/flan-t5-base', 'google/flan-t5-large'
+LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "t5-small")
 
-# Initialize the text2text pipeline once
-device = 0 if torch.cuda.is_available() else -1
+# Determine device: GPU if available
+DEVICE = 0 if torch.cuda.is_available() else -1
+
+# Load tokenizer and model manually to disable safetensors
+print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE==0 else 'CPU'}...", file=sys.stderr)
+tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
+model = AutoModelForSeq2SeqLM.from_pretrained(LOCAL_MODEL, use_safetensors=False)
+
+# Setup the text2text pipeline with manual model and tokenizer
 reconstructor = pipeline(
     "text2text-generation",
-    model=LOCAL_MODEL,
-    device=device,
+    model=model,
+    tokenizer=tokenizer,
+    device=DEVICE,
     max_length=128,
     do_sample=False,
 )
 
-# System prompt for local model
+# System prompt for local model (included in input prompt)
 SYSTEM_PROMPT = (
     "Restore this corrupted sentence to its original form with minimal edits. "
     "Adjust spaces and punctuation as necessary without adding new information."
 )
 
-
 def reconstruct_with_local(text: str) -> str:
     """
-    Uses the Hugging Face pipeline to reconstruct corrupted text.
+    Uses the local HF pipeline to reconstruct corrupted text.
     """
     prompt = f"{SYSTEM_PROMPT} Text: \"{text}\""
     try:
@@ -45,7 +56,7 @@ def reconstruct_with_local(text: str) -> str:
 
 def process_file(infile: str, outfile: str):
     """
-    Read infile line by line, reconstructing matches and writing to outfile.
+    Read infile line by line, reconstruct matches and write to outfile.
     """
     with open(infile, 'r', encoding='utf-8') as fin, \
          open(outfile, 'w', encoding='utf-8') as fout:
@@ -55,14 +66,13 @@ def process_file(infile: str, outfile: str):
                 corrupted = m.group(1).strip()
                 reconstructed = reconstruct_with_local(corrupted)
                 fout.write(f"Original: {corrupted}\nReconstructed: {reconstructed}\n\n")
-                time.sleep(0.5)  # rate-limit locally
+                time.sleep(0.5)  # small pause
             else:
                 fout.write(line)
 
 
 def main():
-    # Verify model
-    print(f"Using local model: {LOCAL_MODEL} (device: {'cuda' if device==0 else 'cpu'})", file=sys.stderr)
+    print(f"Processing directories: {DIRECTORIES}", file=sys.stderr)
     for d in DIRECTORIES:
         if not os.path.isdir(d):
             print(f"Warning: directory '{d}' not found, skipping.")
@@ -72,7 +82,6 @@ def main():
             print(f"Processing {infile} -> {outfile}")
             process_file(infile, outfile)
     print("Done reconstructing all sentences.")
-
 
 if __name__ == '__main__':
     main()
