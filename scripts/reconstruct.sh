@@ -17,5 +17,7 @@ module load Anaconda3/2024.02-1
 eval "$(conda shell.bash hook)"
 conda activate /home/w314/w314139/.conda/envs/EEGToText
 
+ export OPENAI_API_KEY="your_api_key_here"
+
 # Run the training script
 python3 reconstruct.py
