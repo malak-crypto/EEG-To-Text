@@ -1,85 +1,82 @@
+#!/usr/bin/env python3
+# reconstruct.py
+# Free local reconstruction using Hugging Face Flan-T5
+
 import os
 import re
 import time
 import glob
 import sys
+import torch
+from transformers import pipeline
 
-# ——————————————————————————————————————————————————————————————
-# Load your API key from the environment; ensure your SLURM script
-# does: export OPENAI_API_KEY="sk-…"
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    sys.exit("ERROR: OPENAI_API_KEY not set in environment")
-os.environ["OPENAI_API_KEY"] = api_key
-# ——————————————————————————————————————————————————————————————
-model_name = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
-# Import the new, supported ChatOpenAI from langchain-community
-from langchain_community.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage
+# Configure directories and pattern
+DIRECTORIES = ["results_1exp", "results_2exp"]
+PATTERN = re.compile(r"^predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Prepare your LLM once for all calls
-llm = ChatOpenAI(
-    model_name=model_name,
-    temperature=0.0,
-    max_tokens=150
+# Choose a free local model
+# Options: 'google/flan-t5-base', 'google/flan-t5-large'
+LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/flan-t5-base")
+
+# Initialize the text2text pipeline once
+device = 0 if torch.cuda.is_available() else -1
+reconstructor = pipeline(
+    "text2text-generation",
+    model=LOCAL_MODEL,
+    device=device,
+    max_length=128,
+    do_sample=False,
 )
 
-# Single system prompt
+# System prompt for local model
 SYSTEM_PROMPT = (
-    "As a text reconstructor, your task is to restore corrupted sentences to their original form "
-    "while making minimum changes. Adjust spaces and punctuation as necessary. Do not introduce "
-    "any additional information. If you are unable to reconstruct the text, respond with [False]."
+    "Restore this corrupted sentence to its original form with minimal edits. "
+    "Adjust spaces and punctuation as necessary without adding new information."
 )
 
-# Regex to find your “Predicted string with tf:” lines
-pattern = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Directories to process
-directories = ["results_1exp", "results_2exp"]
-
-def chatgpt_refinement(corrupted_text: str) -> str:
+def reconstruct_with_local(text: str) -> str:
     """
-    Calls the new .generate() API on ChatOpenAI to reconstruct a single sentence.
+    Uses the Hugging Face pipeline to reconstruct corrupted text.
     """
-    system_msg = SystemMessage(content=SYSTEM_PROMPT)
-    human_msg = HumanMessage(content=f"Reconstruct the following text: [{corrupted_text}]")
+    prompt = f"{SYSTEM_PROMPT} Text: \"{text}\""
+    try:
+        result = reconstructor(prompt)[0]
+        return result["generated_text"].strip()
+    except Exception as e:
+        return f"[ERROR] {e}"
 
-    # Use the batch‐style generate interface
-    response = llm.generate([[system_msg, human_msg]])
-    # Extract the text of the first generation
-    gen = response.generations[0][0].text.strip()
 
-    # Strip surrounding brackets if the model emits them
-    return re.sub(r"^\[|\]$", "", gen)
+def process_file(infile: str, outfile: str):
+    """
+    Read infile line by line, reconstructing matches and writing to outfile.
+    """
+    with open(infile, 'r', encoding='utf-8') as fin, \
+         open(outfile, 'w', encoding='utf-8') as fout:
+        for line in fin:
+            m = PATTERN.match(line)
+            if m:
+                corrupted = m.group(1).strip()
+                reconstructed = reconstruct_with_local(corrupted)
+                fout.write(f"Original: {corrupted}\nReconstructed: {reconstructed}\n\n")
+                time.sleep(0.5)  # rate-limit locally
+            else:
+                fout.write(line)
+
 
 def main():
-    for d in directories:
+    # Verify model
+    print(f"Using local model: {LOCAL_MODEL} (device: {'cuda' if device==0 else 'cpu'})", file=sys.stderr)
+    for d in DIRECTORIES:
         if not os.path.isdir(d):
             print(f"Warning: directory '{d}' not found, skipping.")
             continue
-
-        for infile in glob.glob(os.path.join(d, "*.txt")):
-            outfile = os.path.join(d, "reconstructed_" + os.path.basename(infile))
-            print(f"Processing {infile} → {outfile}")
-
-            with open(infile, "r", encoding="utf-8") as fin, \
-                 open(outfile, "w", encoding="utf-8") as fout:
-
-                for line in fin:
-                    m = pattern.match(line)
-                    if m:
-                        corrupted = m.group(1).strip()
-                        try:
-                            refined = chatgpt_refinement(corrupted)
-                        except Exception as e:
-                            refined = f"[ERROR] {e}"
-                        fout.write(f"Original: {corrupted}\n")
-                        fout.write(f"Reconstructed: {refined}\n\n")
-                        # Avoid rate-limit
-                        time.sleep(1)
-                    else:
-                        fout.write(line)
+        for infile in glob.glob(os.path.join(d, '*.txt')):
+            outfile = os.path.join(d, 'reconstructed_' + os.path.basename(infile))
+            print(f"Processing {infile} -> {outfile}")
+            process_file(infile, outfile)
     print("Done reconstructing all sentences.")
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()
