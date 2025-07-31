@@ -26,3 +26,4 @@ dependencies:
     - jiwer
     - wandb
     - openai
+    - langchain
