@@ -14,9 +14,12 @@
 #SBATCH --mail-user=malak.hassanein@alumnos.upm.es
 
 # --- Embed your OpenAI API key here ---
-export OPENAI_API_KEY="your_api_key_here"
+#export OPENAI_API_KEY="your_api_key_here"
 # ---------------------------------------
-export OPENAI_MODEL="gpt-4.1"
+#export OPENAI_MODEL="gpt-4.1"
+
+export LOCAL_RECON_MODEL="google/flan-t5-large"
+
 # Load Anaconda and activate environment
 module load Anaconda3/2024.02-1
 
