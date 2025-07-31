@@ -12,14 +12,14 @@ if not api_key:
     sys.exit("ERROR: OPENAI_API_KEY not set in environment")
 os.environ["OPENAI_API_KEY"] = api_key
 # ——————————————————————————————————————————————————————————————
-
+model_name = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
 # Import the new, supported ChatOpenAI from langchain-community
 from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
 # Prepare your LLM once for all calls
 llm = ChatOpenAI(
-    model_name="gpt-4",
+    model_name=model_name,
     temperature=0.0,
     max_tokens=150
 )
