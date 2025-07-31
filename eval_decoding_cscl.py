@@ -94,14 +94,14 @@ def eval_model(dataloaders, device, tokenizer, criterion, model, output_all_resu
             pred_tokens_previous = tokenizer.convert_ids_to_tokens(pred_ids, skip_special_tokens=True)
 
             f.write(f'predicted string with tf: {pred_string_previous}\n')
-            predictions_previous = predictions_previous.tolist()
-            truncated_prediction_previous = []
-            for t in predictions_previous:
-                if t != tokenizer.eos_token_id:
-                    truncated_prediction_previous.append(t)
-                else:
-                    break
-            pred_tokens_previous = tokenizer.convert_ids_to_tokens(truncated_prediction_previous, skip_special_tokens = True)
+            # predictions_previous = predictions_previous.tolist()
+            # truncated_prediction_previous = []
+            # for t in predictions_previous:
+            #     if t != tokenizer.eos_token_id:
+            #         truncated_prediction_previous.append(t)
+            #     else:
+            #         break
+            # pred_tokens_previous = tokenizer.convert_ids_to_tokens(truncated_prediction_previous, skip_special_tokens = True)
             pred_tokens_list_previous.append(pred_tokens_previous)
             pred_string_list_previous.append(pred_string_previous)
 
