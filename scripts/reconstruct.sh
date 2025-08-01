@@ -18,7 +18,7 @@
 # ---------------------------------------
 #export OPENAI_MODEL="gpt-4.1"
 
-export LOCAL_RECON_MODEL="google/flan-t5-large"
+export LOCAL_RECON_MODEL="google/flan-ul2"
 
 # Load Anaconda and activate environment
 module load Anaconda3/2024.02-1
