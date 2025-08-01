@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import re
 import time
@@ -10,26 +11,17 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 DIRECTORIES = ["results_1exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Use Flan-T5-large by default (override via env var)
-LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/flan-t5-large")
+# Use Flan-UL2 by default (override via env var)
+LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/flan-ul2")
 DEVICE = 0 if torch.cuda.is_available() else -1
 
-# Load tokenizer and model manually to disable safetensors
-print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE==0 else 'CPU'}...", file=sys.stderr)
-tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
-model = AutoModelForSeq2SeqLM.from_pretrained(LOCAL_MODEL, use_safetensors=False)
-
-# Setup the text2text pipeline using beam search
-reconstructor = pipeline(
-    "text2text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    device=DEVICE,
-    max_length=256,
-    do_sample=False,
-    num_beams=5,
-    early_stopping=True,
-)
+# Improved system prompt with explicit instructions
+def get_system_prompt():
+    return (
+        "You are a professional copy editor. "
+        "Always rewrite the following corrupted English sentence into fluent, idiomatic English. "
+        "Return only the corrected sentence—do not repeat the input or add any commentary."
+    )
 
 # Few-shot examples to guide the model
 EXAMPLES = [
@@ -51,14 +43,32 @@ EXAMPLES = [
     ),
 ]
 
-SYSTEM_PROMPT = (
-    "You are an expert in correcting corrupted English sentences. "
-    "Given several examples and a new corrupted sentence, produce only the corrected sentence."
-)
+# Load tokenizer and model manually (disable safetensors)
+print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE==0 else 'CPU'}...", file=sys.stderr)
+tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
+model = AutoModelForSeq2SeqLM.from_pretrained(LOCAL_MODEL, use_safetensors=False)
+
+# Setup the text2text pipeline with more diverse generation settings
+def make_reconstructor():
+    return pipeline(
+        "text2text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        device=DEVICE,
+        max_length=256,
+        do_sample=True,
+        temperature=0.7,
+        num_beams=10,
+        early_stopping=False,
+    )
+
+reconstructor = make_reconstructor()
+SYSTEM_PROMPT = get_system_prompt()
+
 
 def reconstruct_with_local(text: str) -> str:
     """
-    Uses local HF pipeline with few-shot examples.
+    Uses local HF pipeline with improved prompt and settings.
     """
     prompt = SYSTEM_PROMPT + "\n\n"
     for inp, out in EXAMPLES:
@@ -66,9 +76,10 @@ def reconstruct_with_local(text: str) -> str:
     prompt += f"Corrupted: {text}\nCorrect:"
     try:
         res = reconstructor(prompt)[0]
-        return res["generated_text"].strip()
+        return res.get("generated_text", res.get("text", "")).strip()
     except Exception as e:
         return f"[ERROR] {e}"
+
 
 def process_file(infile: str, outfile: str):
     """
@@ -85,6 +96,7 @@ def process_file(infile: str, outfile: str):
                 time.sleep(0.5)
             else:
                 fout.write(line)
+
 
 def main():
     print(f"Using model {LOCAL_MODEL} on {'GPU' if DEVICE==0 else 'CPU'}", file=sys.stderr)
