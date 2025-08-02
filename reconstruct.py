@@ -5,22 +5,27 @@ import time
 import glob
 import sys
 import torch
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    pipeline,
+)
 
 # Configure directories and pattern
 DIRECTORIES = ["results_1exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
-# Use Flan-UL2 by default (override via env var)
-LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "google/flan-ul2")
+# Use a LLaMA-based model by default (override via env var)
+# e.g. "NousResearch/Llama-2-7b-chat-hf" or another compatible GGUF/Quantized variant
+LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "NousResearch/Llama-2-7b-chat-hf")
 DEVICE = 0 if torch.cuda.is_available() else -1
 
-# Improved system prompt with explicit instructions
 def get_system_prompt():
     return (
-        "You are a professional copy editor. "
+        "[INST] You are a professional copy editor. "
         "Always rewrite the following corrupted English sentence into fluent, idiomatic English. "
-        "Return only the corrected sentence—do not repeat the input or add any commentary."
+        "Return only the corrected sentence—do not repeat the input or add any commentary.
+[/INST]"
     )
 
 # Few-shot examples to guide the model
@@ -43,40 +48,60 @@ EXAMPLES = [
     ),
 ]
 
-# Load tokenizer and model manually (disable safetensors)
-print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE==0 else 'CPU'}...", file=sys.stderr)
+# Load tokenizer and causal LLM model
+print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE == 0 else 'CPU'}...", file=sys.stderr)
+# Choose dtype for memory savings if using GPU
+dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
 tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
-model = AutoModelForSeq2SeqLM.from_pretrained(LOCAL_MODEL, use_safetensors=False)
+model = AutoModelForCausalLM.from_pretrained(
+    LOCAL_MODEL,
+    torch_dtype=dtype,
+    low_cpu_mem_usage=True,
+)
+model.to("cuda" if torch.cuda.is_available() else "cpu")
 
-# Setup the text2text pipeline with more diverse generation settings
-def make_reconstructor():
-    return pipeline(
-        "text2text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        device=DEVICE,
-        max_length=256,
-        do_sample=True,
-        temperature=0.7,
-        num_beams=10,
-        early_stopping=False,
-    )
+# Setup text-generation pipeline for LLaMA
+reconstructor = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+    device=DEVICE,
+    max_length=512,
+    do_sample=True,
+    temperature=0.7,
+    top_p=0.9,
+    num_return_sequences=1,
+    eos_token_id=tokenizer.convert_tokens_to_ids(["[/INST]"])[0],
+)
 
-reconstructor = make_reconstructor()
 SYSTEM_PROMPT = get_system_prompt()
+
+def build_prompt(text: str) -> str:
+    # Wrap system prompt and few-shot examples, then the target
+    prompt = SYSTEM_PROMPT + "\n\n"
+    for inp, out in EXAMPLES:
+        prompt += f"[INST] Corrupted: {inp}\nCorrect: {out} [/INST]\n\n"
+    prompt += f"[INST] Corrupted: {text}\nCorrect:"  + " [/INST]"
+    return prompt
 
 
 def reconstruct_with_local(text: str) -> str:
     """
-    Uses local HF pipeline with improved prompt and settings.
+    Uses local LLaMA pipeline with chat-style, few-shot prompt.
     """
-    prompt = SYSTEM_PROMPT + "\n\n"
-    for inp, out in EXAMPLES:
-        prompt += f"Corrupted: {inp}\nCorrect: {out}\n\n"
-    prompt += f"Corrupted: {text}\nCorrect:"
+    prompt = build_prompt(text)
     try:
-        res = reconstructor(prompt)[0]
-        return res.get("generated_text", res.get("text", "")).strip()
+        outputs = reconstructor(prompt)
+        # Extract generated part between prompt and closing tag
+        gen = outputs[0].get("generated_text", "")
+        # Strip off everything up to 'Correct:'
+        split_tag = "Correct:"  
+        if split_tag in gen:
+            gen = gen.split(split_tag, 1)[1]
+        # Remove any closing [/INST]
+        gen = gen.replace("[/INST]", "").strip()
+        return gen
     except Exception as e:
         return f"[ERROR] {e}"
 
@@ -99,7 +124,7 @@ def process_file(infile: str, outfile: str):
 
 
 def main():
-    print(f"Using model {LOCAL_MODEL} on {'GPU' if DEVICE==0 else 'CPU'}", file=sys.stderr)
+    print(f"Using model {LOCAL_MODEL} on {'GPU' if DEVICE == 0 else 'CPU'}", file=sys.stderr)
     for d in DIRECTORIES:
         if not os.path.isdir(d):
             print(f"Warning: directory '{d}' not found, skipping.")
