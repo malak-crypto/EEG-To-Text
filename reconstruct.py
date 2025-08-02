@@ -54,7 +54,6 @@ tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
 model = AutoModelForCausalLM.from_pretrained(
     LOCAL_MODEL,
     torch_dtype=dtype,
-    low_cpu_mem_usage=True,
 )
 model.to("cuda" if torch.cuda.is_available() else "cpu")
 
