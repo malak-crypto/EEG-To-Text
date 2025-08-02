@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import re
 import time
@@ -20,11 +21,10 @@ LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "NousResearch/Llama-2-7b-chat-hf")
 DEVICE = 0 if torch.cuda.is_available() else -1
 
 def get_system_prompt():
-    return (
-        """
-[INST] You are a professional copy editor. Always rewrite the following corrupted English sentence into fluent, idiomatic English. Return only the corrected sentence—do not repeat the input or add any commentary. [/INST]
-        """
-    ).strip()
+    # Single-line prompt to avoid string literal issues
+    return ("[INST] You are a professional copy editor. "
+            "Always rewrite the following corrupted English sentence into fluent, idiomatic English. "
+            "Return only the corrected sentence—do not repeat the input or add any commentary. [/INST]")
 
 # Few-shot examples to guide the model
 EXAMPLES = [
@@ -46,6 +46,8 @@ EXAMPLES = [
     ),
 ]
 
+# Disable safetensors to avoid torch.frombuffer errors
+os.environ["TRANSFORMERS_NO_SAFETENSORS"] = "1"
 # Load tokenizer and causal LLM model
 print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE == 0 else 'CPU'}...", file=sys.stderr)
 dtype = torch.float16 if torch.cuda.is_available() else torch.float32
@@ -54,10 +56,12 @@ tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
 model = AutoModelForCausalLM.from_pretrained(
     LOCAL_MODEL,
     torch_dtype=dtype,
+    low_cpu_mem_usage=True,
 )
 model.to("cuda" if torch.cuda.is_available() else "cpu")
 
 # Setup text-generation pipeline for LLaMA
+eos_id = tokenizer.convert_tokens_to_ids("[/INST]") if "[/INST]" in tokenizer.get_vocab() else None
 reconstructor = pipeline(
     "text-generation",
     model=model,
@@ -68,7 +72,7 @@ reconstructor = pipeline(
     temperature=0.7,
     top_p=0.9,
     num_return_sequences=1,
-    eos_token_id=tokenizer.convert_tokens_to_ids("[/INST]"),
+    eos_token_id=eos_id,
 )
 
 SYSTEM_PROMPT = get_system_prompt()
