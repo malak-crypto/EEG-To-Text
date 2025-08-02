@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import re
 import time
@@ -16,17 +15,16 @@ DIRECTORIES = ["results_1exp"]
 PATTERN = re.compile(r"^Predicted string with tf:\s*(.*)", re.IGNORECASE)
 
 # Use a LLaMA-based model by default (override via env var)
-# e.g. "NousResearch/Llama-2-7b-chat-hf" or another compatible GGUF/Quantized variant
+# e.g. "NousResearch/Llama-2-7b-chat-hf" or another compatible variant
 LOCAL_MODEL = os.getenv("LOCAL_RECON_MODEL", "NousResearch/Llama-2-7b-chat-hf")
 DEVICE = 0 if torch.cuda.is_available() else -1
 
 def get_system_prompt():
     return (
-        "[INST] You are a professional copy editor. "
-        "Always rewrite the following corrupted English sentence into fluent, idiomatic English. "
-        "Return only the corrected sentence—do not repeat the input or add any commentary.
-[/INST]"
-    )
+        """
+[INST] You are a professional copy editor. Always rewrite the following corrupted English sentence into fluent, idiomatic English. Return only the corrected sentence—do not repeat the input or add any commentary. [/INST]
+        """
+    ).strip()
 
 # Few-shot examples to guide the model
 EXAMPLES = [
@@ -50,7 +48,6 @@ EXAMPLES = [
 
 # Load tokenizer and causal LLM model
 print(f"Loading local model '{LOCAL_MODEL}' on {'GPU' if DEVICE == 0 else 'CPU'}...", file=sys.stderr)
-# Choose dtype for memory savings if using GPU
 dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
 tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL, use_fast=True)
@@ -72,7 +69,7 @@ reconstructor = pipeline(
     temperature=0.7,
     top_p=0.9,
     num_return_sequences=1,
-    eos_token_id=tokenizer.convert_tokens_to_ids(["[/INST]"])[0],
+    eos_token_id=tokenizer.convert_tokens_to_ids("[/INST]"),
 )
 
 SYSTEM_PROMPT = get_system_prompt()
@@ -82,7 +79,7 @@ def build_prompt(text: str) -> str:
     prompt = SYSTEM_PROMPT + "\n\n"
     for inp, out in EXAMPLES:
         prompt += f"[INST] Corrupted: {inp}\nCorrect: {out} [/INST]\n\n"
-    prompt += f"[INST] Corrupted: {text}\nCorrect:"  + " [/INST]"
+    prompt += f"[INST] Corrupted: {text}\nCorrect: [/INST]"
     return prompt
 
 
@@ -93,13 +90,10 @@ def reconstruct_with_local(text: str) -> str:
     prompt = build_prompt(text)
     try:
         outputs = reconstructor(prompt)
-        # Extract generated part between prompt and closing tag
         gen = outputs[0].get("generated_text", "")
-        # Strip off everything up to 'Correct:'
-        split_tag = "Correct:"  
-        if split_tag in gen:
-            gen = gen.split(split_tag, 1)[1]
-        # Remove any closing [/INST]
+        # Extract everything after 'Correct:' and before closing tag
+        if "Correct:" in gen:
+            gen = gen.split("Correct:", 1)[1]
         gen = gen.replace("[/INST]", "").strip()
         return gen
     except Exception as e:
