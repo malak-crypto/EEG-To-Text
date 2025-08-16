@@ -10,6 +10,7 @@
 * [Data Preparation](#data-preparation)
 * [Batch Processing on Remote Clusters](#batch-processing-on-remote-clusters)
 * [Training & Evaluation](#training--evaluation)
+* [Reconstruction (Post-processing)](#Reconstruction--(Post-processing))
 
 ## Overview
 
@@ -165,5 +166,14 @@ As a result, all `*_cscl.py` scripts are **commented out**. Feel free to:
 1. Uncomment any `*_cscl.py` file.
 2. Adjust hyperparameters in the corresponding script.
 3. Rerun via `sbatch ./scripts/<script>`.
+
+### Reconstruction (Post-processing)
+After generating predicted sentences, an optional post-processing step reconstructs them with a language model to improve readability (e.g., punctuation, capitalization, small grammatical fixes).
+
+Run:
+
+`sbatch ./scripts/reconstruct.sh`
+
+You can change which language model is used (we used LLaMa 2 during experiments), but results will vary depending on the model and prompts. The exact structure of `reconstruct.py` may also differ.
 
 Feedback and contributions are welcome!
