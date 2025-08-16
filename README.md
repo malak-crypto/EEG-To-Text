@@ -176,4 +176,6 @@ Run:
 
 You can change which language model is used (we used LLaMa 2 during experiments), but results will vary depending on the model and prompts. The exact structure of `reconstruct.py` may also differ.
 
+This reconstruction step was inspired by the repository by Hamza Amrani: https://github.com/hamzaamrani/EEG-to-Text-Decoding/tree/main
+
 Feedback and contributions are welcome!
