@@ -10,7 +10,7 @@
 * [Data Preparation](#data-preparation)
 * [Batch Processing on Remote Clusters](#batch-processing-on-remote-clusters)
 * [Training & Evaluation](#training--evaluation)
-* [Reconstruction Post-processing](#Reconstruction--Post-processing)
+* [Reconstruction Post-processing](#Reconstruction-Post-processing)
 
 ## Overview
 
