@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
 # Sample size and z-score for 95% CI
-n = 18379
+#n = 18379
+n=34678
 z = 1.96
 
 bleu_data = {
