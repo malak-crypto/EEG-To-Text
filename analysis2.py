@@ -3,23 +3,38 @@ import matplotlib.pyplot as plt
 
 # Sample size and z-score for 95% CI
 #n = 18379
-n=34678
+
 z = 1.96
 
-# Data definitions
+# bleu_data = {
+#     'BLEU-1': {'T5 Orig': 0.4531, 'T5 Trans': 0.4581, 'BART Orig': 0.4163, 'BART Trans': 0.4265},
+#     'BLEU-2': {'T5 Orig': 0.2781, 'T5 Trans': 0.2803, 'BART Orig': 0.2422, 'BART Trans': 0.2524},
+#     'BLEU-3': {'T5 Orig': 0.1723, 'T5 Trans': 0.1703, 'BART Orig': 0.1379, 'BART Trans': 0.1482},
+#     'BLEU-4': {'T5 Orig': 0.1074, 'T5 Trans': 0.1027, 'BART Orig': 0.0791, 'BART Trans': 0.0882}
+# }
+# rouge_data = {
+#     'ROUGE-1 P': {'T5 Orig': 0.3219, 'T5 Trans': 0.3281, 'BART Orig': 0.3328, 'BART Trans': 0.3412},
+#     'ROUGE-1 R': {'T5 Orig': 0.2844, 'T5 Trans': 0.2935, 'BART Orig': 0.3032, 'BART Trans': 0.3146},
+#     'ROUGE-1 F': {'T5 Orig': 0.3002, 'T5 Trans': 0.3080, 'BART Orig': 0.3163, 'BART Trans': 0.3269}
+# }
+# wer_data = {
+#     'WER': {'T5 Orig': 0.7726, 'T5 Trans': 0.7714, 'BART Orig': 0.7515, 'BART Trans': 0.7471}
+# }
+
+n=34678
 bleu_data = {
-    'BLEU-1': {'T5 Orig': 0.4531, 'T5 Trans': 0.4581, 'BART Orig': 0.4163, 'BART Trans': 0.4265},
-    'BLEU-2': {'T5 Orig': 0.2781, 'T5 Trans': 0.2803, 'BART Orig': 0.2422, 'BART Trans': 0.2524},
-    'BLEU-3': {'T5 Orig': 0.1723, 'T5 Trans': 0.1703, 'BART Orig': 0.1379, 'BART Trans': 0.1482},
-    'BLEU-4': {'T5 Orig': 0.1074, 'T5 Trans': 0.1027, 'BART Orig': 0.0791, 'BART Trans': 0.0882}
+    'BLEU-1': {'T5 Orig': 0.4422, 'T5 Trans': 0.4462, 'BART Orig': 0.4074, 'BART Trans': 0.4145},
+    'BLEU-2': {'T5 Orig': 0.2677, 'T5 Trans': 0.2709, 'BART Orig': 0.2315, 'BART Trans': 0.2398},
+    'BLEU-3': {'T5 Orig': 0.1626, 'T5 Trans': 0.1642, 'BART Orig': 0.1299, 'BART Trans': 0.1369},
+    'BLEU-4': {'T5 Orig': 0.0994, 'T5 Trans': 0.0992, 'BART Orig': 0.0743, 'BART Trans': 0.0792}
 }
 rouge_data = {
-    'ROUGE-1 P': {'T5 Orig': 0.3219, 'T5 Trans': 0.3281, 'BART Orig': 0.3328, 'BART Trans': 0.3412},
-    'ROUGE-1 R': {'T5 Orig': 0.2844, 'T5 Trans': 0.2935, 'BART Orig': 0.3032, 'BART Trans': 0.3146},
-    'ROUGE-1 F': {'T5 Orig': 0.3002, 'T5 Trans': 0.3080, 'BART Orig': 0.3163, 'BART Trans': 0.3269}
+    'ROUGE-1 P': {'T5 Orig': 0.3162, 'T5 Trans': 0.3224, 'BART Orig': 0.3268, 'BART Trans': 0.3314},
+    'ROUGE-1 R': {'T5 Orig': 0.2787, 'T5 Trans': 0.2856, 'BART Orig': 0.2988, 'BART Trans': 0.3073},
+    'ROUGE-1 F': {'T5 Orig': 0.2943, 'T5 Trans': 0.3010, 'BART Orig': 0.3112, 'BART Trans': 0.3183}
 }
 wer_data = {
-    'WER': {'T5 Orig': 0.7726, 'T5 Trans': 0.7714, 'BART Orig': 0.7515, 'BART Trans': 0.7471}
+    'WER': {'T5 Orig': 0.7949, 'T5 Trans': 0.7797, 'BART Orig': 0.7585, 'BART Trans': 0.7539}
 }
 
 def plot_bell(ax, mean, se, label, x_vals):
